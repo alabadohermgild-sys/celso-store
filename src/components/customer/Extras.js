@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CONFIG, ls } from '../../lib/config';
+import { CONFIG, ls, dbAddGcash } from '../../lib/config';
 import { QtyControl, StatusBadge, EmptyState } from '../shared/UI';
 import { ArrowDownCircle, ArrowUpCircle, Upload, Send, Shield, Zap } from 'lucide-react';
 
@@ -225,7 +225,7 @@ export function GcashServices() {
   const [proofPreview, setProofPreview] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [requests, setRequests] = useState(() => ls.get('celso_gcash', []));
+  const [requests, setRequests] = useState([]);
 
   const amt = parseFloat(amount) || 0;
   const isValid = amt >= 100;

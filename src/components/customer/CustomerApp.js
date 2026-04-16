@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ls, CONFIG } from '../../lib/config';
+import { ls, CONFIG, dbAddOrder } from '../../lib/config';
 import { products as BASE_PRODUCTS, categories as BASE_CATEGORIES } from '../../data/products';
 import Sidebar from './Sidebar';
 import ProductGrid from './ProductGrid';
@@ -122,7 +122,7 @@ function PageFooter() {
 export default function CustomerApp({ onAdmin }) {
   const [tab, setTab] = useState('shop');
   const [cart, setCart] = useState(() => ls.get('celso_cart', []));
-  const [orders, setOrders] = useState(() => ls.get('celso_orders', []));
+  const [orders, setOrders] = useState([]);
   const [allProducts, setAllProducts] = useState(loadProds);
   const [allCategories, setAllCategories] = useState(loadCats);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -144,7 +144,7 @@ export default function CustomerApp({ onAdmin }) {
   }, []);
 
   useEffect(() => ls.set('celso_cart', cart), [cart]);
-  useEffect(() => ls.set('celso_orders', orders), [orders]);
+  // orders saved to shared DB instead of localStorage
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
