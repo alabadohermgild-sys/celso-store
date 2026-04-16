@@ -30,29 +30,52 @@ export const STATUS_COLORS = {
 
 const JSONBIN_BIN_ID = '69e0cca7856a6821893e0fbc';
 const JSONBIN_API_KEY = '$2a$10$F4lPNYazEtp6pYII/8nqLuxbwg0n3YRwUf4qwoq9yEb71P9Rrskb6';
-const isConfigured = !JSONBIN_BIN_ID.includes('PASTE');
+
+const isConfigured = JSONBIN_BIN_ID && !JSONBIN_BIN_ID.includes('PASTE');
 const BASE_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
-const HDRS = { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY, 'X-Bin-Versioning': 'false' };
+
+const HDRS = { 
+  'Content-Type': 'application/json', 
+  'X-Master-Key': JSONBIN_API_KEY,
+  'X-Bin-Versioning': 'false'
+};
 
 export async function dbRead() {
   if (isConfigured) {
     try {
       const res = await fetch(`${BASE_URL}/latest`, { headers: HDRS });
+      if (!res.ok) throw new Error(`Status: ${res.status}`);
       const json = await res.json();
+      console.log("Cloud Data Loaded Successfully");
       return json.record || { orders: [], gcashRequests: [] };
-    } catch(e) { console.error('DB read error', e); }
+    } catch(e) { 
+      console.error('Cloud Read Error - using local storage', e); 
+    }
   }
-  return { orders: ls.get('celso_orders', []), gcashRequests: ls.get('celso_gcash', []) };
+  return { 
+    orders: ls.get('celso_orders', []), 
+    gcashRequests: ls.get('celso_gcash', []) 
+  };
 }
 
 export async function dbWrite(data) {
   if (isConfigured) {
-    try { await fetch(BASE_URL, { method: 'PUT', headers: HDRS, body: JSON.stringify(data) }); }
-    catch(e) { console.error('DB write error', e); }
-  } else {
-    ls.set('celso_orders', data.orders || []);
-    ls.set('celso_gcash', data.gcashRequests || []);
+    try {
+      const res = await fetch(BASE_URL, { 
+        method: 'PUT', 
+        headers: HDRS, 
+        body: JSON.stringify(data) 
+      });
+      if (!res.ok) {
+        const errJson = await res.json();
+        console.error('Cloud Write Failed:', errJson);
+      } else {
+        console.log("Cloud Saved Successfully");
+      }
+    } catch(e) { console.error('Network error during write', e); }
   }
+  ls.set('celso_orders', data.orders || []);
+  ls.set('celso_gcash', data.gcashRequests || []);
 }
 
 export async function dbAddOrder(order) {
