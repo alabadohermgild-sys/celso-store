@@ -26,24 +26,24 @@ function PageFooter() {
   return (
     <>
       <footer className="border-t border-gray-200 mt-8 pt-8 pb-6 px-6 text-center">
-        <p className="text-base font-900 text-gray-800">🏪 Celso Store</p>
+        <p className="text-base font-900 text-gray-800">ðŸª Celso Store</p>
         <p className="text-sm text-gray-500 font-700 mt-0.5">Proudly Serving You!</p>
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-500 font-700 flex-wrap">
           <button onClick={() => setShowTerms(true)} className="hover:text-green-600 transition-colors underline underline-offset-2">Terms of Service</button>
-          <span className="text-gray-300">·</span>
+          <span className="text-gray-300">Â·</span>
           <button onClick={() => setShowPrivacy(true)} className="hover:text-green-600 transition-colors underline underline-offset-2">Privacy Policy</button>
-          <span className="text-gray-300">·</span>
+          <span className="text-gray-300">Â·</span>
           <button onClick={() => setShowContact(true)} className="hover:text-green-600 transition-colors underline underline-offset-2">Contact Us</button>
-          <span className="text-gray-300">·</span>
+          <span className="text-gray-300">Â·</span>
           <a href="#admin" className="hover:text-green-600 transition-colors underline underline-offset-2">Admin</a>
         </div>
         <div className="flex items-center justify-center gap-4 mt-3">
-          <a href="https://www.facebook.com/Slimshady477" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-700 transition-colors">📘 Facebook</a>
-          <span className="text-gray-300 text-xs">·</span>
-          <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-700 transition-colors">🌐 Developer Portfolio</a>
+          <a href="https://www.facebook.com/Slimshady477" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-700 transition-colors">ðŸ“˜ Facebook</a>
+          <span className="text-gray-300 text-xs">Â·</span>
+          <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-700 transition-colors">ðŸŒ Developer Portfolio</a>
         </div>
-        <p className="text-xs text-gray-600 font-700 mt-4">© 2026 Celso Store. All rights reserved.</p>
-        <p className="text-xs text-gray-500 font-700 mt-1">Proudly Made with ❤️ by <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-500 font-700 transition-colors">Hermz</a></p>
+        <p className="text-xs text-gray-600 font-700 mt-4">Â© 2026 Celso Store. All rights reserved.</p>
+        <p className="text-xs text-gray-500 font-700 mt-1">Proudly Made with â¤ï¸ by <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-500 font-700 transition-colors">Hermz</a></p>
       </footer>
 
       {showContact && (
@@ -52,23 +52,23 @@ function PageFooter() {
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-900 text-gray-900">Contact Us</h3>
-              <button onClick={() => setShowContact(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-700 text-lg hover:bg-gray-200">×</button>
+              <button onClick={() => setShowContact(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-700 text-lg hover:bg-gray-200">Ã—</button>
             </div>
             <div className="space-y-3">
               <a href="mailto:alabadohermgild@gmail.com" className="flex items-center gap-3 p-3.5 bg-gray-50 hover:bg-green-50 rounded-xl transition-colors group">
-                <span className="text-2xl">📧</span>
+                <span className="text-2xl">ðŸ“§</span>
                 <div><p className="text-xs text-gray-500 font-700">Email</p><p className="text-sm font-800 text-gray-900 group-hover:text-green-700">alabadohermgild@gmail.com</p></div>
               </a>
               <a href="tel:09812693563" className="flex items-center gap-3 p-3.5 bg-gray-50 hover:bg-green-50 rounded-xl transition-colors group">
-                <span className="text-2xl">📞</span>
+                <span className="text-2xl">ðŸ“ž</span>
                 <div><p className="text-xs text-gray-500 font-700">Phone</p><p className="text-sm font-800 text-gray-900 group-hover:text-green-700">0981 269 3563</p></div>
               </a>
               <a href="https://www.facebook.com/Slimshady477" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3.5 bg-gray-50 hover:bg-blue-50 rounded-xl transition-colors group">
-                <span className="text-2xl">📘</span>
+                <span className="text-2xl">ðŸ“˜</span>
                 <div><p className="text-xs text-gray-500 font-700">Facebook</p><p className="text-sm font-800 text-gray-900 group-hover:text-blue-700">facebook.com/Slimshady477</p></div>
               </a>
               <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3.5 bg-gray-50 hover:bg-green-50 rounded-xl transition-colors group">
-                <span className="text-2xl">🌐</span>
+                <span className="text-2xl">ðŸŒ</span>
                 <div><p className="text-xs text-gray-500 font-700">Developer Portfolio</p><p className="text-sm font-800 text-gray-900 group-hover:text-green-700">hermzz.wuaze.com</p></div>
               </a>
             </div>
@@ -82,13 +82,13 @@ function PageFooter() {
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-900 text-gray-900">Terms of Service</h3>
-              <button onClick={() => setShowTerms(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-700 text-lg hover:bg-gray-200">×</button>
+              <button onClick={() => setShowTerms(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-700 text-lg hover:bg-gray-200">Ã—</button>
             </div>
             <div className="space-y-4 text-sm text-gray-600 font-600 leading-relaxed">
               <p><strong className="text-gray-900">1. Orders</strong><br/>All orders are subject to availability. We reserve the right to cancel if items are out of stock.</p>
               <p><strong className="text-gray-900">2. Payments</strong><br/>We accept GCash and cash. GCash payments require a reference number and screenshot. A 2% fee applies to GCash orders.</p>
               <p><strong className="text-gray-900">3. Delivery</strong><br/>Fees vary by distance. Estimated delivery: 30-45 minutes. We are not responsible for delays due to weather or other factors.</p>
-              <p><strong className="text-gray-900">4. GCash Services</strong><br/>Cash-in and cash-out carry a 3% service fee. Minimum transaction is ₱100. Store hours apply.</p>
+              <p><strong className="text-gray-900">4. GCash Services</strong><br/>Cash-in and cash-out carry a 3% service fee. Minimum transaction is â‚±100. Store hours apply.</p>
               <p><strong className="text-gray-900">5. Refunds</strong><br/>Refunds only for incorrect or defective items. Contact us within 24 hours of receiving your order.</p>
               <p><strong className="text-gray-900">6. Contact</strong><br/>alabadohermgild@gmail.com or 0981 269 3563.</p>
             </div>
@@ -102,7 +102,7 @@ function PageFooter() {
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-900 text-gray-900">Privacy Policy</h3>
-              <button onClick={() => setShowPrivacy(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-700 text-lg hover:bg-gray-200">×</button>
+              <button onClick={() => setShowPrivacy(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-700 text-lg hover:bg-gray-200">Ã—</button>
             </div>
             <div className="space-y-4 text-sm text-gray-600 font-600 leading-relaxed">
               <p><strong className="text-gray-900">Information We Collect</strong><br/>We collect your name, phone, and address only to process your orders. We do not share this with third parties.</p>
@@ -174,9 +174,7 @@ export default function CustomerApp({ onAdmin }) {
       timestamp: new Date().toISOString(),
       status: 'pending',
     };
-    const updated = [o, ...orders];
-    setOrders(updated);
-    ls.set('celso_orders', updated);
+    dbAddOrder(o).then(updated => setOrders(updated));
     setConfirmedOrder(o);
     setCart([]);
     setCheckoutOpen(false);
@@ -195,7 +193,7 @@ export default function CustomerApp({ onAdmin }) {
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
 
-      {/* ── DESKTOP LAYOUT ── */}
+      {/* â”€â”€ DESKTOP LAYOUT â”€â”€ */}
       <div className="hidden lg:flex h-screen overflow-hidden">
         {/* Sidebar */}
         <Sidebar
@@ -215,7 +213,7 @@ export default function CustomerApp({ onAdmin }) {
             <div className="flex items-center gap-3">
               {tab === 'shop' && (
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">ðŸ”</span>
                   <input
                     className="pl-9 pr-4 py-2.5 bg-gray-100 rounded-xl text-sm font-600 outline-none focus:ring-2 focus:ring-green-500 w-64 transition-all text-gray-900 placeholder-gray-400"
                     placeholder="Search products..."
@@ -226,7 +224,7 @@ export default function CustomerApp({ onAdmin }) {
               <button
                 onClick={() => setCartOpen(true)}
                 className={`relative flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-700 text-sm transition-all active:scale-95 ${cartBounce ? 'bounce-anim' : ''}`}>
-                🛒 Cart
+                ðŸ›’ Cart
                 {cartCount > 0 && (
                   <span className="bg-amber-400 text-gray-900 text-xs font-900 w-6 h-6 rounded-full flex items-center justify-center">{cartCount}</span>
                 )}
@@ -259,12 +257,12 @@ export default function CustomerApp({ onAdmin }) {
         )}
       </div>
 
-      {/* ── MOBILE LAYOUT ── */}
+      {/* â”€â”€ MOBILE LAYOUT â”€â”€ */}
       <div className="lg:hidden flex flex-col min-h-screen">
         <header className="bg-green-600 text-white px-4 py-3 sticky top-0 z-40 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🏪</span>
+              <span className="text-2xl">ðŸª</span>
               <div>
                 <h1 className="text-base font-900 leading-tight">{CONFIG.storeName}</h1>
                 <p className="text-xs text-green-200 font-700">{CONFIG.tagline}</p>
@@ -274,7 +272,7 @@ export default function CustomerApp({ onAdmin }) {
               <button
                 onClick={() => setCartOpen(true)}
                 className={`relative w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center text-lg ${cartBounce ? 'bounce-anim' : ''}`}>
-                🛒
+                ðŸ›’
                 {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-900 w-5 h-5 rounded-full flex items-center justify-center">{cartCount}</span>}
               </button>
             </div>
@@ -318,10 +316,10 @@ export default function CustomerApp({ onAdmin }) {
 
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 flex">
           {[
-            { id: 'shop', emoji: '🛒', label: 'Shop' },
-            { id: 'gcash', emoji: '💚', label: 'GCash' },
-            { id: 'orders', emoji: '📦', label: 'Orders' },
-            { id: 'admin', emoji: '⚙️', label: 'Admin' },
+            { id: 'shop', emoji: 'ðŸ›’', label: 'Shop' },
+            { id: 'gcash', emoji: 'ðŸ’š', label: 'GCash' },
+            { id: 'orders', emoji: 'ðŸ“¦', label: 'Orders' },
+            { id: 'admin', emoji: 'âš™ï¸', label: 'Admin' },
           ].map(item => (
             <button key={item.id}
               onClick={() => item.id === 'admin' ? onAdmin() : setTab(item.id)}
@@ -333,7 +331,7 @@ export default function CustomerApp({ onAdmin }) {
         </nav>
       </div>
 
-      {/* ── OVERLAYS ── */}
+      {/* â”€â”€ OVERLAYS â”€â”€ */}
       {cartOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50" onClick={() => setCartOpen(false)} />
@@ -378,7 +376,7 @@ export default function CustomerApp({ onAdmin }) {
               <span className="bg-amber-400 text-gray-900 font-900 w-7 h-7 rounded-full flex items-center justify-center text-xs">{cartCount}</span>
               <span className="font-800">View Cart</span>
             </div>
-            <span className="font-900 text-base">₱{subtotal.toLocaleString()} →</span>
+            <span className="font-900 text-base">â‚±{subtotal.toLocaleString()} â†’</span>
           </button>
         </div>
       )}
