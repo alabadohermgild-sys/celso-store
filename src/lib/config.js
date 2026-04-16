@@ -1,4 +1,4 @@
-export const ls = {
+﻿export const ls = {
   get: (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
@@ -28,8 +28,8 @@ export const STATUS_COLORS = {
   delivered: { bg: 'bg-green-100',  text: 'text-green-800',  dot: 'bg-green-500' },
 };
 
-const JSONBIN_BIN_ID = '69e0cca7856a6821893e0fbc';
-const JSONBIN_API_KEY = '$2a$10$F4lPNYazEtp6pYII/8nqLuxbwg0n3YRwUf4qwoq9yEb71P9Rrskb6';
+const JSONBIN_BIN_ID = '69e0e427aaba88219706c568';
+const JSONBIN_API_KEY = '$2a$10$cP2vdCuXDxTN8Ut1/dlDXOILYSFR9gqNlHthoSuzQNzuI3xrt1VRa';
 
 const isConfigured = JSONBIN_BIN_ID && !JSONBIN_BIN_ID.includes('PASTE');
 const BASE_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
