@@ -14,7 +14,7 @@ export default function Sidebar({ tab, setTab, activeCategory, setActiveCategory
     <aside className="w-64 bg-green-700 flex flex-col h-full flex-shrink-0 shadow-xl">
       {/* Brand */}
       <div className="px-6 py-6 border-b border-green-600">
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-3">
           <div className="w-11 h-11 bg-amber-400 rounded-xl flex items-center justify-center text-2xl shadow-md">🏪</div>
           <div>
             <h1 className="text-white font-900 text-lg leading-tight">{CONFIG.storeName}</h1>

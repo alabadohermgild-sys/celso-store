@@ -5,7 +5,10 @@
 
 @layer base {
   * { box-sizing: border-box; }
-  body { font-family: 'Nunito', system-ui, sans-serif; background: #f0ebe0; }
+  body {
+    font-family: 'Nunito', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', system-ui, sans-serif;
+    background: #f0ebe0;
+  }
   input, textarea, button, select { font-family: inherit; }
 }
 
