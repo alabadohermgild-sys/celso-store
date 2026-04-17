@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ls, CONFIG, dbAddOrder } from '../../lib/config';
+import { ls, CONFIG, dbAddOrder, dbGetProducts } from '../../lib/config';
 import { products as BASE_PRODUCTS, categories as BASE_CATEGORIES } from '../../data/products';
 import Sidebar from './Sidebar';
 import ProductGrid from './ProductGrid';
@@ -133,7 +133,7 @@ export default function CustomerApp({ onAdmin }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cartBounce, setCartBounce] = useState(false);
 
-  // Reload when admin updates products
+  // Reload when admin updates products locally
   useEffect(() => {
     const reload = () => {
       setAllProducts(loadProds());
@@ -141,6 +141,16 @@ export default function CustomerApp({ onAdmin }) {
     };
     window.addEventListener('celso_products_updated', reload);
     return () => window.removeEventListener('celso_products_updated', reload);
+  }, []);
+
+  // Load products from shared DB on mount so all devices see same products
+  useEffect(() => {
+    dbGetProducts().then(prods => {
+      if (prods && prods.length > 0) {
+        setAllProducts(prods);
+        localStorage.setItem('celso_products_custom', JSON.stringify(prods));
+      }
+    }).catch(e => console.error('Product fetch error:', e));
   }, []);
 
   useEffect(() => ls.set('celso_cart', cart), [cart]);

@@ -83,3 +83,14 @@ export async function dbUpdateGcashStatus(id, status) {
   await dbWrite(updated);
   return updated.gcashRequests;
 }
+
+export async function dbGetProducts() {
+  const data = await dbRead();
+  return data.products || null;
+}
+
+export async function dbSaveProducts(products) {
+  const data = await dbRead();
+  const updated = { ...data, products };
+  await dbWrite(updated);
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CONFIG, ORDER_STATUSES, STATUS_COLORS, ls, dbRead, dbUpdateOrderStatus, dbUpdateGcashStatus } from '../../lib/config';
+import { CONFIG, ORDER_STATUSES, STATUS_COLORS, ls, dbRead, dbUpdateOrderStatus, dbUpdateGcashStatus, dbGetProducts, dbSaveProducts } from '../../lib/config';
 import { StatusBadge, EmptyState } from '../shared/UI';
 
 // shared product storage key - same key used by CustomerApp
@@ -80,6 +80,11 @@ export function AdminPanel({ onLogout }) {
       const data = await dbRead();
       setOrders(data.orders || []);
       setGcashReqs(data.gcashRequests || []);
+      if (data.products && data.products.length > 0) {
+        setProducts(data.products);
+        localStorage.setItem(PROD_KEY, JSON.stringify(data.products));
+        window.dispatchEvent(new Event('celso_products_updated'));
+      }
     } catch(e) { console.error('Admin refresh error:', e); }
     finally { setDbLoading(false); }
   };
@@ -106,6 +111,17 @@ export function AdminPanel({ onLogout }) {
     try { return require('../../data/products').categories; } catch { return []; }
   });
 
+  // Load products from shared DB on mount
+  useEffect(() => {
+    dbGetProducts().then(prods => {
+      if (prods && prods.length > 0) {
+        setProducts(prods);
+        localStorage.setItem('celso_products_custom', JSON.stringify(prods));
+        window.dispatchEvent(new Event('celso_products_updated'));
+      }
+    }).catch(e => console.error('Product load error:', e));
+  }, []);
+
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
@@ -129,11 +145,14 @@ export function AdminPanel({ onLogout }) {
   };
 
   // Save products to shared storage so CustomerApp can read them
-  const saveProducts = (p) => {
+  const saveProducts = async (p) => {
     setProducts(p);
     localStorage.setItem(PROD_KEY, JSON.stringify(p));
-    // Dispatch event so CustomerApp can reload
     window.dispatchEvent(new Event('celso_products_updated'));
+    // Save to shared DB so all devices see new products
+    try {
+      await dbSaveProducts(p);
+    } catch(e) { console.error('Product save error:', e); }
   };
 
   const saveCategories = (c) => {
