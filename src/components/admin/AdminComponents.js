@@ -381,7 +381,7 @@ export function AdminPanel({ onLogout }) {
                   </div>
                   <div className="p-3">
                     <p className="text-xs font-800 text-gray-900 leading-tight mb-1 line-clamp-2">{p.name}</p>
-                    <p className="text-sm font-900 text-green-700 mb-2">₱{p.price}</p>
+                    <p className="text-sm font-900 text-green-700 mb-1">₱{p.price}</p><p className="text-xs text-gray-500 font-700 mb-2">{p.unit || 'per piece'}</p>
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs text-gray-600 font-800">{p.stock} in stock</span>
                       <div className="flex gap-1">
@@ -458,7 +458,7 @@ export function AdminPanel({ onLogout }) {
 
 // ── ADD PRODUCT MODAL ─────────────────────────────────────────────────────────
 function AddProductModal({ categories, onClose, onSave }) {
-  const [form, setForm] = useState({ name: '', price: '', stock: '', emoji: '📦', category: 'snacks', description: '', tags: [], image: '' });
+  const [form, setForm] = useState({ name: '', price: '', stock: '', emoji: '📦', category: 'snacks', description: '', tags: [], image: '', unit: 'per piece' });
   const [imagePreview, setImagePreview] = useState(null);
   const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -558,6 +558,23 @@ function AddProductModal({ categories, onClose, onSave }) {
             </div>
           </div>
 
+          <div>
+            <label className="text-sm font-800 text-gray-800 block mb-1.5">Sold As (Unit)</label>
+            <select value={form.unit} onChange={e => upd('unit', e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base outline-none focus:border-green-500 text-gray-900 bg-white">
+              <option value="per piece">per piece</option>
+              <option value="per pack">per pack</option>
+              <option value="per bundle">per bundle</option>
+              <option value="per tie">per tie</option>
+              <option value="per bag">per bag</option>
+              <option value="per box">per box</option>
+              <option value="per bottle">per bottle</option>
+              <option value="per sachet">per sachet</option>
+              <option value="per kilo">per kilo</option>
+              <option value="per can">per can</option>
+              <option value="per tray">per tray</option>
+              <option value="per dozen">per dozen</option>
+            </select>
+          </div>
           <div className="flex gap-3 pt-2">
             <button onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-sm font-800 text-gray-700 hover:bg-gray-50 transition-all">Cancel</button>
             <button onClick={save} disabled={!form.name || !form.price || !form.stock}

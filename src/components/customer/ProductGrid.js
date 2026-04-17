@@ -78,7 +78,7 @@ function ProductCard({ product, cartQty, onView, onAdd, onInc, onDec }) {
       {/* Info */}
       <div className="p-3 flex flex-col flex-1">
         <p className="text-sm font-700 text-gray-800 leading-snug mb-1 min-h-[2.5rem] line-clamp-2">{product.name}</p>
-        <p className="text-lg font-900 text-green-600 mb-0.5">₱{product.price}</p>
+        <p className="text-lg font-900 text-green-600 mb-0.5">₱{product.price} <span className="text-xs font-700 text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-md">{product.unit || 'per piece'}</span></p>
         <p className="text-xs text-gray-400 font-600 mb-3">{product.stock} in stock</p>
 
         {/* Add to cart */}

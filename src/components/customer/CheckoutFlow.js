@@ -7,8 +7,8 @@ const STEPS = ['Order Type', 'Payment', 'Your Info', 'GCash Payment', 'Confirm']
 function Footer() {
   return (
     <div className="text-center py-4 px-4 border-t border-gray-100 mt-2">
-      <p className="text-xs text-gray-400 font-600">Celso Store • Proudly Serving You!</p>
-      <p className="text-xs text-gray-300 mt-0.5">Secure checkout • No account required • Campus delivery</p>
+      <p className="text-xs text-gray-600 font-700">Celso Store • Proudly Serving You!</p>
+      <p className="text-xs text-gray-500 font-600 mt-0.5">Secure checkout • No account required • Campus delivery</p>
     </div>
   );
 }
@@ -117,7 +117,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                       className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all font-700 ${orderType === t.id ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 hover:border-gray-300 text-gray-600'}`}>
                       <span className="text-3xl">{t.emoji}</span>
                       <span className="text-base">{t.label}</span>
-                      <span className="text-xs text-gray-400 font-600">{t.sub}</span>
+                      <span className="text-xs text-gray-600 font-700">{t.sub}</span>
                     </button>
                   ))}
                 </div>
@@ -247,11 +247,11 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
 
                 <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 font-600">Account Name</span>
+                    <span className="text-gray-700 font-700">Account Name</span>
                     <strong className="text-gray-900">{CONFIG.gcashName}</strong>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500 font-600">Mobile Number</span>
+                    <span className="text-gray-700 font-700">Mobile Number</span>
                     <div className="flex items-center gap-2">
                       <strong className="text-gray-900 font-900 text-base tracking-wide">{CONFIG.gcashNumber}</strong>
                       <button onClick={copyGcash}
@@ -261,9 +261,9 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                     </div>
                   </div>
                   <div className="border-t border-emerald-200 pt-3 space-y-1">
-                    <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">Subtotal</span><span className="font-700 text-gray-900">₱{subtotal.toLocaleString()}</span></div>
-                    {deliveryFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">Delivery</span><span className="font-700 text-gray-900">₱{deliveryFee}</span></div>}
-                    <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">GCash fee (2%)</span><span className="font-700 text-orange-600">+₱{gcashFee}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-700 font-700">Subtotal</span><span className="font-700 text-gray-900">₱{subtotal.toLocaleString()}</span></div>
+                    {deliveryFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-700 font-700">Delivery</span><span className="font-700 text-gray-900">₱{deliveryFee}</span></div>}
+                    <div className="flex justify-between text-sm"><span className="text-gray-700 font-700">GCash fee (2%)</span><span className="font-700 text-orange-600">+₱{gcashFee}</span></div>
                     <div className="flex justify-between"><span className="text-gray-700 font-800">Amount to Send</span><strong className="text-emerald-600 text-2xl font-900">₱{total.toLocaleString()}</strong></div>
                   </div>
                 </div>
@@ -314,9 +314,9 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                   ))}
                 </div>
                 <div className="space-y-2 px-1">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">Subtotal</span><span className="font-700 text-gray-900">₱{subtotal.toLocaleString()}</span></div>
-                  {deliveryFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">Delivery ({zone?.label})</span><span className="font-700 text-gray-900">₱{deliveryFee}</span></div>}
-                  {gcashFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">GCash fee (2%)</span><span className="font-700 text-orange-600">+₱{gcashFee}</span></div>}
+                  <div className="flex justify-between text-sm"><span className="text-gray-700 font-700">Subtotal</span><span className="font-700 text-gray-900">₱{subtotal.toLocaleString()}</span></div>
+                  {deliveryFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-700 font-700">Delivery ({zone?.label})</span><span className="font-700 text-gray-900">₱{deliveryFee}</span></div>}
+                  {gcashFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-700 font-700">GCash fee (2%)</span><span className="font-700 text-orange-600">+₱{gcashFee}</span></div>}
                   <div className="flex justify-between font-900 text-base border-t border-gray-200 pt-2">
                     <span className="text-gray-900">Total</span>
                     <span className="text-green-600 text-xl">₱{total.toLocaleString()}</span>
@@ -332,7 +332,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                     info.address && ['Address', info.address],
                   ].filter(Boolean).map(([k, v]) => (
                     <div key={k} className="flex justify-between">
-                      <span className="text-gray-500 font-600">{k}</span>
+                      <span className="text-gray-700 font-700">{k}</span>
                       <span className="font-700 text-gray-900 text-right max-w-xs text-xs">{v}</span>
                     </div>
                   ))}
