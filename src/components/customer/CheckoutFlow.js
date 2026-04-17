@@ -7,8 +7,8 @@ const STEPS = ['Order Type', 'Payment', 'Your Info', 'GCash Payment', 'Confirm']
 function Footer() {
   return (
     <div className="text-center py-4 px-4 border-t border-gray-100 mt-2">
-      <p className="text-xs text-gray-600 font-700">Celso Store • Proudly Serving You!</p>
-      <p className="text-xs text-gray-500 font-600 mt-0.5">Secure checkout • No account required • Campus delivery</p>
+      <p className="text-xs text-gray-600 font-700">Celso Store • Happy to serve you.☺️</p>
+      <p className="text-xs text-gray-500 font-600 mt-0.5">Secure checkout • No account needed • Fast delivery</p>
     </div>
   );
 }
