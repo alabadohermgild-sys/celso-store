@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ls, CONFIG, dbAddOrder, dbGetProducts } from '../../lib/config';
+import { ls, CONFIG, dbAddOrder, dbGetProducts, dbRead } from '../../lib/config';
 import { products as BASE_PRODUCTS, categories as BASE_CATEGORIES } from '../../data/products';
 import Sidebar from './Sidebar';
 import ProductGrid from './ProductGrid';

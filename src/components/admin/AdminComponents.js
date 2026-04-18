@@ -79,7 +79,7 @@ export function AdminPanel({ onLogout }) {
     try {
       const data = await dbRead();
       setOrders(data.orders || []);
-      setGcashReqs(data.gcashRequests || []);
+      setGcashReqs(data.gcashRequests || data.gcashreqs || []);
       if (data.products && data.products.length > 0) {
         setProducts(data.products);
         localStorage.setItem(PROD_KEY, JSON.stringify(data.products));
@@ -494,7 +494,7 @@ function AddProductModal({ categories, onClose, onSave }) {
 
   const save = () => {
     if (!form.name || !form.price || !form.stock) return;
-    onSave({ ...form, id: Date.now(), price: parseFloat(form.price), stock: parseInt(form.stock) });
+    onSave({ ...form, id: Date.now(), price: parseFloat(form.price), stock: parseInt(form.stock), unit: form.unit || 'per piece', tags: form.tags || [] });
   };
 
   const catOptions = categories.filter(c => c.id !== 'all').map(c => c.id);

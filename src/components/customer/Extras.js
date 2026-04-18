@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CONFIG, ls, dbAddGcash } from '../../lib/config';
+import { CONFIG, ls, dbAddGcash, dbRead } from '../../lib/config';
 import { QtyControl, StatusBadge, EmptyState } from '../shared/UI';
 import { ArrowDownCircle, ArrowUpCircle, Upload, Send, Shield, Zap } from 'lucide-react';
 
@@ -226,6 +226,14 @@ export function GcashServices() {
   const [submitted, setSubmitted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [requests, setRequests] = useState([]);
+  const [gcashLoading, setGcashLoading] = useState(true);
+
+  useEffect(() => {
+    dbRead().then(data => {
+      if (data.gcashRequests) setRequests(data.gcashRequests);
+    }).catch(e => console.error('Load gcash error:', e))
+    .finally(() => setGcashLoading(false));
+  }, []);
 
   const amt = parseFloat(amount) || 0;
   const isValid = amt >= 100;
@@ -250,7 +258,8 @@ export function GcashServices() {
 
   const submit = async () => {
     if (!isValid || !name || !number) return;
-    if (service === 'cashout' && !proofPreview) return;
+    // cashout proof optional - don't block submission
+    // if (service === 'cashout' && !proofPreview) return;
     const req = {
       id: 'GC-' + Date.now().toString().slice(-6),
       service, amount: amt, fee, youReceive, youPay,
@@ -388,7 +397,7 @@ export function GcashServices() {
           )}
 
           <button onClick={submit}
-            disabled={!isValid || !name || !number || (service === 'cashout' && !proofPreview)}
+            disabled={!isValid || !name || !number}
             className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-800 py-4 rounded-xl text-base transition-all active:scale-95">
             <Send size={18} /> Submit Request →
           </button>
