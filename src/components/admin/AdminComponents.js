@@ -80,8 +80,7 @@ export function AdminPanel({ onLogout }) {
       const data = await dbRead();
       setOrders(data.orders || []);
       setGcashReqs(data.gcashRequests || []);
-      // Products: only load from DB on first mount (setDbLoading still true)
-      // After that, local state is source of truth to avoid flicker
+      // Products NOT updated from 15s refresh - local state is source of truth
     } catch(e) { console.error('Admin refresh error:', e); }
     finally { setDbLoading(false); }
   };
@@ -92,8 +91,14 @@ export function AdminPanel({ onLogout }) {
       setOrders(data.orders || []);
       setGcashReqs(data.gcashRequests || []);
       if (data.products && data.products.length > 0) {
-        setProducts(data.products);
-        localStorage.setItem(PROD_KEY, JSON.stringify(data.products));
+        const imgMap = JSON.parse(localStorage.getItem('celso_product_images') || '{}');
+        const merged = data.products.map(p => ({
+          ...p,
+          image: imgMap[p.id] || p.image || null,
+          unit: p.unit || 'per piece',
+        }));
+        setProducts(merged);
+        localStorage.setItem(PROD_KEY, JSON.stringify(merged));
         window.dispatchEvent(new Event('celso_products_updated'));
       }
       setDbLoading(false);
@@ -346,15 +351,15 @@ export function AdminPanel({ onLogout }) {
                       </div>
 
                       {/* View uploaded proof */}
-                      {req.proofPreview && req.proofPreview !== '[img]' && (
+                      {req.proofPreview && req.proofPreview !== '[img]' && req.proofPreview.startsWith('data:') && (
                         <button onClick={() => setViewReceipt(req.proofPreview)}
                           className="flex items-center gap-1.5 text-xs font-800 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors w-full justify-center">
                           🖼️ View Payment Proof
                         </button>
                       )}
-                      {req.proofPreview === '[img]' && (
-                        <div className="flex items-center gap-1.5 text-xs font-800 text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg w-full justify-center">
-                          📸 Screenshot uploaded (view on customer device)
+                      {(!req.proofPreview || req.proofPreview === '[img]') && req.service === 'cashout' && (
+                        <div className="flex items-center gap-1.5 text-xs font-700 text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg w-full justify-center">
+                          📸 Customer uploaded screenshot
                         </div>
                       )}
 

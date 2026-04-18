@@ -14,12 +14,11 @@ const loadProds = () => {
   try {
     const s = localStorage.getItem('celso_products_custom');
     const prods = s ? JSON.parse(s) : BASE_PRODUCTS;
-    // Merge with locally stored images (base64 not saved to DB)
     try {
       const imgMap = JSON.parse(localStorage.getItem('celso_product_images') || '{}');
-      return prods.map(p => ({ ...p, image: imgMap[p.id] || p.image || null }));
-    } catch { return prods; }
-  } catch { return BASE_PRODUCTS; }
+      return prods.map(p => ({ ...p, image: imgMap[p.id] || p.image || null, unit: p.unit || 'per piece' }));
+    } catch { return prods.map(p => ({ ...p, unit: p.unit || 'per piece' })); }
+  } catch { return BASE_PRODUCTS.map(p => ({ ...p, unit: p.unit || 'per piece' })); }
 };
 const loadCats = () => {
   try { const s = localStorage.getItem('celso_categories_custom'); return s ? JSON.parse(s) : BASE_CATEGORIES; }

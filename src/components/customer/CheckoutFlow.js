@@ -51,7 +51,8 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
     if (step === 1 && payMethod !== 'gcash') { setStep(2); return; }
     if (step === 2 && payMethod !== 'gcash') { setStep(4); return; }
     if (step === 4) {
-      onPlace({ orderType, deliveryZone: zone, payMethod, ...info, gcashRef, proofPreview, subtotal, deliveryFee, gcashFee, total });
+      // Strip proofPreview from order - too large for DB, saved separately via GCash flow
+      onPlace({ orderType, deliveryZone: zone, payMethod, ...info, gcashRef, proofPreview: null, subtotal, deliveryFee, gcashFee, total });
       return;
     }
     setStep(s => s + 1);

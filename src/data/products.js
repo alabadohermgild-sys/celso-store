@@ -12,10 +12,10 @@ export const categories = [
 
 export const products = [
   // Beverages
-  { id: 1, name: 'Coca-Cola 1.5L', category: 'beverages', price: 65, stock: 24, emoji: '🥤', description: 'Classic Coca-Cola in 1.5L bottle. Ice cold and refreshing!', tags: ['popular'] },
-  { id: 2, name: 'Sprite 1L', category: 'beverages', price: 45, stock: 18, emoji: '🍋', description: 'Crisp lemon-lime Sprite soda', tags: [] },
+  { id: 1, name: 'Coca-Cola 1.5L', category: 'beverages', price: 65, stock: 24, emoji: '🥤', description: 'Classic Coca-Cola in 1.5L bottle. Ice cold and refreshing!', tags: ['popular'], unit: 'per bottle' },
+  { id: 2, name: 'Sprite 1L', category: 'beverages', price: 45, stock: 18, emoji: '🍋', description: 'Crisp lemon-lime Sprite soda', tags: [], unit: 'per bottle' },
   { id: 3, name: 'Royal TRU-ORANGE 1.5L', category: 'beverages', price: 58, stock: 12, emoji: '🍊', description: 'Filipino favorite orange soda', tags: ['popular'] },
-  { id: 4, name: 'Milo 3-in-1 Sachet', category: 'beverages', price: 8, stock: 100, emoji: '☕', description: 'Chocolate malt drink sachet', tags: ['bestseller'] },
+  { id: 4, name: 'Milo 3-in-1 Sachet', category: 'beverages', price: 8, stock: 100, emoji: '☕', description: 'Chocolate malt drink sachet', tags: ['bestseller'], unit: 'per sachet' },
   { id: 5, name: 'C2 Green Tea 500mL', category: 'beverages', price: 22, stock: 30, emoji: '🍵', description: 'Ready-to-drink green tea', tags: [] },
   { id: 6, name: 'Zesto Orange 250mL', category: 'beverages', price: 12, stock: 50, emoji: '🧃', description: 'Juice drink tetra pack', tags: [] },
   { id: 7, name: 'Red Horse Beer 1L', category: 'beverages', price: 85, stock: 24, emoji: '🍺', description: 'Strong beer, 6.9% alcohol', tags: [] },
@@ -37,7 +37,7 @@ export const products = [
   { id: 19, name: 'Palm Corned Tuna 180g', category: 'canned', price: 35, stock: 28, emoji: '🐠', description: 'Corned tuna in brine', tags: [] },
 
   // Noodles
-  { id: 20, name: 'Lucky Me! Pancit Canton 80g', category: 'noodles', price: 12, stock: 80, emoji: '🍜', description: 'Stir-fried noodles, original flavor', tags: ['bestseller'] },
+  { id: 20, name: 'Lucky Me! Pancit Canton 80g', category: 'noodles', price: 12, stock: 80, emoji: '🍜', description: 'Stir-fried noodles, original flavor', tags: ['bestseller'], unit: 'per pack' },
   { id: 21, name: 'Nissin Cup Noodles Seafood 70g', category: 'noodles', price: 18, stock: 45, emoji: '🍣', description: 'Cup noodles with seafood flavor', tags: [] },
   { id: 22, name: 'Payless Pancit Canton 55g', category: 'noodles', price: 8, stock: 100, emoji: '🍝', description: 'Budget stir-fried noodles', tags: ['popular'] },
   { id: 23, name: 'Quickchow Instant Mami 55g', category: 'noodles', price: 10, stock: 70, emoji: '🍲', description: 'Instant chicken mami noodles', tags: [] },
