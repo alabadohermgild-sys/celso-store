@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { CONFIG, ORDER_STATUSES, STATUS_COLORS, dbRead, dbWrite, dbUpdateOrderStatus, dbUpdateGcashStatus } from '../../lib/config';
 import { StatusBadge, EmptyState } from '../shared/UI';
 
@@ -593,7 +593,7 @@ function AddCategoryModal({ onClose, onSave }) {
 
   const save = () => {
     if (!name.trim()) return;
-    onSave({ id: name.toLowerCase().replace(/\s+/g, '_'), name: name.trim(), emoji });
+    onSave({ id: name.toLowerCase().replace(/\s+/g, ' '), name: name.trim(), emoji });
     onClose();
   };
 
