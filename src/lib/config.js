@@ -101,15 +101,6 @@ export async function dbUpdateGcashStatus(id, status) {
   return result.gcashRequests;
 }
 
-export async function dbGetProducts() {
-  const data = await dbRead();
-  return data.products || null;
-}
-
-export async function dbSaveProducts(products) {
-  const result = await safeWrite(data => ({ ...data, products }));
-  return result.products;
-}
 
 export async function dbGetProducts() {
   const data = await dbRead();

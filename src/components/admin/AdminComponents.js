@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CONFIG, ORDER_STATUSES, STATUS_COLORS, ls, dbRead, dbUpdateOrderStatus, dbUpdateGcashStatus, dbGetProducts, dbSaveProducts } from '../../lib/config';
+import { CONFIG, ORDER_STATUSES, STATUS_COLORS, dbRead, dbUpdateOrderStatus, dbUpdateGcashStatus, dbGetProducts, dbSaveProducts } from '../../lib/config';
 import { StatusBadge, EmptyState } from '../shared/UI';
 
 // shared product storage key - same key used by CustomerApp
@@ -94,7 +94,7 @@ export function AdminPanel({ onLogout }) {
     const interval = setInterval(refreshData, 15000);
     return () => clearInterval(interval);
   }, []);
-  const [loading, setLoading] = useState(true);
+
 
   // Load from shared DB on mount and every 15 seconds (live refresh)
   
@@ -233,7 +233,7 @@ export function AdminPanel({ onLogout }) {
         {/* ─── ORDERS TAB ─── */}
         {tab === 'orders' && (
           <div className="pb-8">
-            {loading && <div className="flex items-center gap-2 text-gray-400 text-sm font-700 mb-4"><div className="w-4 h-4 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin" />Loading orders from database...</div>}
+            {dbLoading && <div className="flex items-center gap-2 text-gray-400 text-sm font-700 mb-4"><div className="w-4 h-4 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin" />Loading orders from database...</div>}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
               <span className="text-sm font-800 text-gray-700">Filter:</span>
               {['all', ...ORDER_STATUSES].map(s => (

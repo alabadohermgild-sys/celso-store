@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { CONFIG, ls, dbAddGcash, dbRead } from '../../lib/config';
-import { QtyControl, StatusBadge, EmptyState } from '../shared/UI';
+import React, { useState, useEffect } from 'react';
+import { CONFIG, dbAddGcash, dbRead } from '../../lib/config';
+import { QtyControl, EmptyState } from '../shared/UI';
 import { ArrowDownCircle, ArrowUpCircle, Upload, Send, Shield, Zap } from 'lucide-react';
 
 function PageFooter() {
@@ -226,13 +226,13 @@ export function GcashServices() {
   const [submitted, setSubmitted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [requests, setRequests] = useState([]);
-  const [gcashLoading, setGcashLoading] = useState(true);
+
 
   useEffect(() => {
     dbRead().then(data => {
       if (data.gcashRequests) setRequests(data.gcashRequests);
     }).catch(e => console.error('Load gcash error:', e))
-    .finally(() => setGcashLoading(false));
+    ;
   }, []);
 
   const amt = parseFloat(amount) || 0;

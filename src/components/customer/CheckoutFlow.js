@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CONFIG, ls } from '../../lib/config';
 import { Upload } from 'lucide-react';
 
@@ -24,7 +24,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
   });
   const [gcashRef, setGcashRef] = useState('');
   const [proofPreview, setProofPreview] = useState(null);
-  const [errors, setErrors] = useState({});
+  const [errors] = useState({});
   const [nameSaved, setNameSaved] = useState(() => !!ls.get('celso_customer', {}).name);
   const [copied, setCopied] = useState(false);
 
