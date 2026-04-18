@@ -227,11 +227,18 @@ export function GcashServices() {
   const [copied, setCopied] = useState(false);
   const [requests, setRequests] = useState([]);
 
-  // Load gcash request history from shared DB on mount
+  // Load gcash history from DB and merge with local proof images
   useEffect(() => {
     dbRead().then(data => {
       if (data.gcashRequests && data.gcashRequests.length > 0) {
-        setRequests(data.gcashRequests);
+        try {
+          const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
+          const merged = data.gcashRequests.map(r => ({
+            ...r,
+            proofPreview: localProofs[r.id] || r.proofPreview || null,
+          }));
+          setRequests(merged);
+        } catch { setRequests(data.gcashRequests); }
       }
     }).catch(e => console.error('GCash history load error:', e));
   }, []);
@@ -276,23 +283,15 @@ export function GcashServices() {
     setRequests(prev => [req, ...prev]);
     setSubmitted(true);
     setAmount(''); setName(''); setNumber(''); setProofPreview(null);
-    // Save to shared DB - strip base64 proof (too large), store proof locally only
-    const reqForDB = { ...req, proofPreview: req.proofPreview ? '[image_uploaded]' : null };
-    // Save full req with image to localStorage for local viewing
+    // Save proof image locally (too large for DB)
     try {
-      const localReqs = JSON.parse(localStorage.getItem('celso_gcash_local') || '[]');
-      localStorage.setItem('celso_gcash_local', JSON.stringify([req, ...localReqs]));
+      const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
+      if (req.proofPreview) localProofs[req.id] = req.proofPreview;
+      localStorage.setItem('celso_gcash_proofs', JSON.stringify(localProofs));
     } catch(e) {}
-    dbAddGcash(reqForDB).then(updatedReqs => {
-      // Merge with local proof images
-      try {
-        const localReqs = JSON.parse(localStorage.getItem('celso_gcash_local') || '[]');
-        const merged = updatedReqs.map(r => {
-          const local = localReqs.find(l => l.id === r.id);
-          return local ? { ...r, proofPreview: local.proofPreview } : r;
-        });
-        setRequests(merged);
-      } catch(e) { setRequests(updatedReqs); }
+    // Save to DB (proof auto-stripped to [img] by stripBase64)
+    dbAddGcash(req).then(updatedReqs => {
+      setRequests(updatedReqs);
     }).catch(e => {
       console.error('GCash DB save error:', e);
     });

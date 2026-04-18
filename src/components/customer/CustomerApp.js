@@ -11,8 +11,15 @@ import { MyOrders } from './Extras';
 import { ProductModal } from './Extras';
 
 const loadProds = () => {
-  try { const s = localStorage.getItem('celso_products_custom'); return s ? JSON.parse(s) : BASE_PRODUCTS; }
-  catch { return BASE_PRODUCTS; }
+  try {
+    const s = localStorage.getItem('celso_products_custom');
+    const prods = s ? JSON.parse(s) : BASE_PRODUCTS;
+    // Merge with locally stored images (base64 not saved to DB)
+    try {
+      const imgMap = JSON.parse(localStorage.getItem('celso_product_images') || '{}');
+      return prods.map(p => ({ ...p, image: imgMap[p.id] || p.image || null }));
+    } catch { return prods; }
+  } catch { return BASE_PRODUCTS; }
 };
 const loadCats = () => {
   try { const s = localStorage.getItem('celso_categories_custom'); return s ? JSON.parse(s) : BASE_CATEGORIES; }
@@ -179,10 +186,11 @@ export default function CustomerApp({ onAdmin }) {
   const getCartQty = (id) => cart.find(i => i.id === id)?.qty || 0;
 
   const placeOrder = async (orderData) => {
+    // Build order - proofPreview stripped by config.js stripBase64 automatically
     const o = {
       id: 'ORD-' + Date.now().toString().slice(-6),
       ...orderData,
-      // Strip base64 images from cart items - too large for DB (use emoji as fallback)
+      proofPreview: null, // never store proof in order, it goes via GCash flow
       cart: cart.map(item => ({
         id: item.id,
         name: item.name,
@@ -191,19 +199,35 @@ export default function CustomerApp({ onAdmin }) {
         emoji: item.emoji || '📦',
         unit: item.unit || 'per piece',
         category: item.category,
+        // image stored locally only - not in DB
       })),
       timestamp: new Date().toISOString(),
       status: 'pending',
     };
-    // Show immediately in UI (use full cart with images for local display)
-    const oFull = { ...o, cart: cart.map(i => ({ ...i })) };
-    setOrders(prev => [oFull, ...prev]);
-    setConfirmedOrder(oFull);
+    // Show immediately in UI with local images
+    const imgMap = JSON.parse(localStorage.getItem('celso_product_images') || '{}');
+    const oDisplay = {
+      ...o,
+      cart: cart.map(item => ({
+        ...item,
+        image: imgMap[item.id] || item.image || null,
+      })),
+    };
+    setOrders(prev => [oDisplay, ...prev]);
+    setConfirmedOrder(oDisplay);
     setCart([]);
     setCheckoutOpen(false);
-    // Save stripped version to DB in background (no base64 images)
+    // Save to DB in background (base64 auto-stripped)
     dbAddOrder(o).then(updatedOrders => {
-      setOrders(updatedOrders);
+      // Merge DB orders with local images for display
+      const merged = updatedOrders.map(ord => ({
+        ...ord,
+        cart: (ord.cart || []).map(item => ({
+          ...item,
+          image: imgMap[item.id] || item.image || null,
+        })),
+      }));
+      setOrders(merged);
     }).catch(e => {
       console.error('Order DB save error:', e);
     });

@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { CONFIG, ORDER_STATUSES, STATUS_COLORS, dbRead, dbWrite, dbUpdateOrderStatus, dbUpdateGcashStatus } from '../../lib/config';
+import React, { useState, useEffect } from 'react';
+import { CONFIG, ORDER_STATUSES, STATUS_COLORS, dbRead, dbSaveProducts, dbUpdateOrderStatus, dbUpdateGcashStatus } from '../../lib/config';
 import { StatusBadge, EmptyState } from '../shared/UI';
 
 // shared product storage key - same key used by CustomerApp
@@ -80,19 +80,31 @@ export function AdminPanel({ onLogout }) {
       const data = await dbRead();
       setOrders(data.orders || []);
       setGcashReqs(data.gcashRequests || []);
-      // Only update products from DB if no local write is pending
-      if (data.products && data.products.length > 0 && !window._savingProducts) {
-        setProducts(data.products);
-        localStorage.setItem(PROD_KEY, JSON.stringify(data.products));
-        window.dispatchEvent(new Event('celso_products_updated'));
-      }
+      // Products: only load from DB on first mount (setDbLoading still true)
+      // After that, local state is source of truth to avoid flicker
     } catch(e) { console.error('Admin refresh error:', e); }
     finally { setDbLoading(false); }
   };
 
   useEffect(() => {
-    refreshData();
-    const interval = setInterval(refreshData, 15000);
+    // Load products from DB on first mount only
+    dbRead().then(data => {
+      setOrders(data.orders || []);
+      setGcashReqs(data.gcashRequests || []);
+      if (data.products && data.products.length > 0) {
+        setProducts(data.products);
+        localStorage.setItem(PROD_KEY, JSON.stringify(data.products));
+        window.dispatchEvent(new Event('celso_products_updated'));
+      }
+      setDbLoading(false);
+    }).catch(() => setDbLoading(false));
+    // Poll orders/gcash every 15s but NOT products (to avoid overwriting local changes)
+    const interval = setInterval(() => {
+      dbRead().then(data => {
+        setOrders(data.orders || []);
+        setGcashReqs(data.gcashRequests || []);
+      }).catch(e => console.error('Poll error:', e));
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -131,24 +143,21 @@ export function AdminPanel({ onLogout }) {
     try { await dbUpdateGcashStatus(id, status); } catch(e) { console.error(e); }
   };
 
-  // Save products to shared storage AND shared DB so all devices see them
+  // Save products: full data (with images) to localStorage, stripped to DB
   const saveProducts = async (p) => {
-    window._savingProducts = true;
+    // Save FULL products (with base64 images) to localStorage for THIS device
     setProducts(p);
     localStorage.setItem(PROD_KEY, JSON.stringify(p));
+    // Save images map separately so other devices can use emoji fallback
+    const imageMap = {};
+    p.forEach(prod => { if (prod.image && prod.image.startsWith('data:')) imageMap[prod.id] = prod.image; });
+    localStorage.setItem('celso_product_images', JSON.stringify(imageMap));
     window.dispatchEvent(new Event('celso_products_updated'));
+    // Save to DB (base64 stripped automatically by config.js stripBase64)
     try {
-      const data = await dbRead();
-      // Strip base64 images before saving to DB (JSONBin 100KB limit)
-      // Products with uploaded images keep emoji as fallback in DB
-      const pForDB = p.map(prod => ({
-        ...prod,
-        image: prod.image && prod.image.startsWith('data:') ? null : prod.image,
-      }));
-      await dbWrite({ ...data, products: pForDB });
-      console.log('Products saved to DB:', pForDB.length, 'items');
+      await dbSaveProducts(p);
+      console.log('Products saved to DB:', p.length, 'items');
     } catch(e) { console.error('Product DB save error:', e); }
-    finally { window._savingProducts = false; }
   };
 
   const saveCategories = (c) => {
@@ -337,11 +346,16 @@ export function AdminPanel({ onLogout }) {
                       </div>
 
                       {/* View uploaded proof */}
-                      {req.proofPreview && (
+                      {req.proofPreview && req.proofPreview !== '[img]' && (
                         <button onClick={() => setViewReceipt(req.proofPreview)}
                           className="flex items-center gap-1.5 text-xs font-800 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors w-full justify-center">
                           🖼️ View Payment Proof
                         </button>
+                      )}
+                      {req.proofPreview === '[img]' && (
+                        <div className="flex items-center gap-1.5 text-xs font-800 text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg w-full justify-center">
+                          📸 Screenshot uploaded (view on customer device)
+                        </div>
                       )}
 
                       <div className="flex gap-2 pt-1">
@@ -593,7 +607,7 @@ function AddCategoryModal({ onClose, onSave }) {
 
   const save = () => {
     if (!name.trim()) return;
-    onSave({ id: name.toLowerCase().replace(/\s+/g, ' '), name: name.trim(), emoji });
+    onSave({ id: name.toLowerCase().replace(/\s+/g, '_'), name: name.trim(), emoji });
     onClose();
   };
 
