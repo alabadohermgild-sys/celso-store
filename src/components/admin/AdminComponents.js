@@ -75,11 +75,11 @@ export function AdminPanel({ onLogout }) {
   const [gcashReqs, setGcashReqs] = useState([]);
   const [dbLoading, setDbLoading] = useState(true);
 
-  const refreshData = async () => {
+  const refreshData = async (force) => {
     try {
       const data = await dbRead();
       setOrders(data.orders || []);
-      setGcashReqs(data.gcashRequests || data.gcashreqs || []);
+      setGcashReqs(data.gcashRequests || []);
       if (data.products && data.products.length > 0) {
         setProducts(data.products);
         localStorage.setItem(PROD_KEY, JSON.stringify(data.products));
@@ -149,9 +149,9 @@ export function AdminPanel({ onLogout }) {
     setProducts(p);
     localStorage.setItem(PROD_KEY, JSON.stringify(p));
     window.dispatchEvent(new Event('celso_products_updated'));
-    // Save to shared DB so all devices see new products
     try {
       await dbSaveProducts(p);
+      console.log('Products saved to DB:', p.length, 'items');
     } catch(e) { console.error('Product save error:', e); }
   };
 

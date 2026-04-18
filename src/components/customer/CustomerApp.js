@@ -145,12 +145,19 @@ export default function CustomerApp({ onAdmin }) {
 
   // Load products from shared DB on mount so all devices see same products
   useEffect(() => {
-    dbGetProducts().then(prods => {
-      if (prods && prods.length > 0) {
-        setAllProducts(prods);
-        localStorage.setItem('celso_products_custom', JSON.stringify(prods));
+    dbRead().then(data => {
+      // Load orders history
+      if (data.orders && data.orders.length > 0) {
+        setOrders(data.orders);
       }
-    }).catch(e => console.error('Product fetch error:', e));
+      // Load products
+      if (data.products && data.products.length > 0) {
+        setAllProducts(data.products);
+        localStorage.setItem('celso_products_custom', JSON.stringify(data.products));
+        window.dispatchEvent(new Event('celso_products_updated'));
+      }
+      // Load gcash requests for history
+    }).catch(e => console.error('Initial DB load error:', e));
   }, []);
 
   useEffect(() => ls.set('celso_cart', cart), [cart]);
