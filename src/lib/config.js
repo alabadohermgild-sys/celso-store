@@ -56,59 +56,30 @@ export async function dbWrite(data) {
   }
 }
 
-let _writing = false;
-async function safeWrite(mutateFn) {
-  let retries = 0;
-  while (_writing && retries < 20) { await new Promise(r => setTimeout(r, 200)); retries++; }
-  _writing = true;
-  try {
-    const data = await dbRead();
-    const updated = mutateFn(data);
-    await dbWrite(updated);
-    return updated;
-  } finally { _writing = false; }
-}
-
 export async function dbAddOrder(order) {
-  const result = await safeWrite(data => ({
-    ...data,
-    orders: [order, ...(data.orders || [])],
-  }));
-  return result.orders;
+  const data = await dbRead();
+  const updated = { ...data, orders: [order, ...(data.orders || [])] };
+  await dbWrite(updated);
+  return updated.orders;
 }
 
 export async function dbAddGcash(req) {
-  const result = await safeWrite(data => ({
-    ...data,
-    gcashRequests: [req, ...(data.gcashRequests || [])],
-  }));
-  return result.gcashRequests;
+  const data = await dbRead();
+  const updated = { ...data, gcashRequests: [req, ...(data.gcashRequests || [])] };
+  await dbWrite(updated);
+  return updated.gcashRequests;
 }
 
 export async function dbUpdateOrderStatus(id, status) {
-  const result = await safeWrite(data => ({
-    ...data,
-    orders: (data.orders || []).map(o => o.id === id ? { ...o, status } : o),
-  }));
-  return result.orders;
+  const data = await dbRead();
+  const updated = { ...data, orders: data.orders.map(o => o.id === id ? { ...o, status } : o) };
+  await dbWrite(updated);
+  return updated.orders;
 }
 
 export async function dbUpdateGcashStatus(id, status) {
-  const result = await safeWrite(data => ({
-    ...data,
-    gcashRequests: (data.gcashRequests || []).map(r => r.id === id ? { ...r, status } : r),
-  }));
-  return result.gcashRequests;
-}
-
-
-export async function dbGetProducts() {
   const data = await dbRead();
-  return data.products || null;
-}
-
-export async function dbSaveProducts(products) {
-  const data = await dbRead();
-  const updated = { ...data, products };
+  const updated = { ...data, gcashRequests: data.gcashRequests.map(r => r.id === id ? { ...r, status } : r) };
   await dbWrite(updated);
+  return updated.gcashRequests;
 }

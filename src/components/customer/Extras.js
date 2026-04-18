@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CONFIG, dbAddGcash, dbRead } from '../../lib/config';
-import { QtyControl, EmptyState } from '../shared/UI';
+import { QtyControl, StatusBadge, EmptyState } from '../shared/UI';
 import { ArrowDownCircle, ArrowUpCircle, Upload, Send, Shield, Zap } from 'lucide-react';
 
 function PageFooter() {
@@ -26,8 +26,8 @@ function PageFooter() {
           <span className="text-gray-300 text-xs">·</span>
           <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-700 transition-colors">🌐 Developer Portfolio</a>
         </div>
-        <p className="text-xs text-gray-600 font-700 mt-4">© 2026 Celso Store. All rights reserved.</p>
-        <p className="text-xs text-gray-500 font-700 mt-1">Developed by <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-500 font-700 transition-colors">Hermz</a></p>
+        <p className="text-xs text-gray-400 mt-4">© 2026 Celso Store. All rights reserved.</p>
+        <p className="text-xs text-gray-300 mt-1">Proudly Made with ❤️ by <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-500 font-700 transition-colors">Hermz</a></p>
       </footer>
 
       {showContact && (
@@ -159,7 +159,7 @@ export function OrderConfirm({ order, onClose }) {
             <div className="space-y-2">
               {order.cart?.map(item => (
                 <div key={item.id} className="flex justify-between text-sm">
-                  <span className="text-gray-700 font-600">{item.emoji} {item.name} ×{item.qty} <span className="text-gray-400 text-xs">({item.unit || 'per piece'})</span></span>
+                  <span className="text-gray-700 font-600">{item.emoji} {item.name} ×{item.qty}</span>
                   <span className="font-800 text-gray-900">₱{(item.price * item.qty).toLocaleString()}</span>
                 </div>
               ))}
@@ -196,7 +196,7 @@ export function ProductModal({ product, cartQty, onAdd, onUpdateQty, onClose }) 
             <span className="bg-gray-100 text-gray-600 text-xs font-700 px-2.5 py-1 rounded-full">{product.category}</span>
           </div>
           <div className="flex items-center justify-between mb-5">
-            <div className="flex items-baseline gap-2"><span className="text-3xl font-900 text-green-600">₱{product.price}</span><span className="text-xs font-800 text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">{product.unit || 'per piece'}</span></div>
+            <span className="text-3xl font-900 text-green-600">₱{product.price}</span>
             {cartQty === 0
               ? <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-2 py-1">
                   <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-8 h-8 bg-green-600 text-white rounded-lg flex items-center justify-center font-800 hover:bg-green-700">−</button>
@@ -227,12 +227,13 @@ export function GcashServices() {
   const [copied, setCopied] = useState(false);
   const [requests, setRequests] = useState([]);
 
-
+  // Load gcash request history from shared DB on mount
   useEffect(() => {
     dbRead().then(data => {
-      if (data.gcashRequests) setRequests(data.gcashRequests);
-    }).catch(e => console.error('Load gcash error:', e))
-    ;
+      if (data.gcashRequests && data.gcashRequests.length > 0) {
+        setRequests(data.gcashRequests);
+      }
+    }).catch(e => console.error('GCash history load error:', e));
   }, []);
 
   const amt = parseFloat(amount) || 0;
@@ -258,25 +259,29 @@ export function GcashServices() {
 
   const submit = async () => {
     if (!isValid || !name || !number) return;
-    // cashout proof optional - don't block submission
-    // if (service === 'cashout' && !proofPreview) return;
     const req = {
       id: 'GC-' + Date.now().toString().slice(-6),
-      service, amount: amt, fee, youReceive, youPay,
-      name, number,
-      proofPreview,        // ← screenshot image included here
+      service,
+      amount: amt,
+      fee,
+      youReceive,
+      youPay,
+      name,
+      number,
+      proofPreview: proofPreview || null,
       status: 'pending',
       timestamp: new Date().toISOString(),
     };
+    // Show success immediately
+    setRequests(prev => [req, ...prev]);
     setSubmitted(true);
     setAmount(''); setName(''); setNumber(''); setProofPreview(null);
-    // Save to shared database so admin sees it from any device
-    try {
-      const updatedReqs = await dbAddGcash(req);
+    // Save to shared DB in background - both cashin AND cashout
+    dbAddGcash(req).then(updatedReqs => {
       setRequests(updatedReqs);
-    } catch(e) {
-      setRequests(prev => [req, ...prev]);
-    }
+    }).catch(e => {
+      console.error('GCash DB save error:', e);
+    });
   };
 
   if (submitted) return (

@@ -27,7 +27,7 @@ function PageFooter() {
     <>
       <footer className="border-t border-gray-200 mt-8 pt-8 pb-6 px-6 text-center">
         <p className="text-base font-900 text-gray-800">🏪 Celso Store</p>
-        <p className="text-sm text-gray-500 font-700 mt-0.5">Convenience at Your Fingertips.</p>
+        <p className="text-sm text-gray-500 font-700 mt-0.5">Proudly Serving You!</p>
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-500 font-700 flex-wrap">
           <button onClick={() => setShowTerms(true)} className="hover:text-green-600 transition-colors underline underline-offset-2">Terms of Service</button>
           <span className="text-gray-300">·</span>
@@ -42,8 +42,8 @@ function PageFooter() {
           <span className="text-gray-300 text-xs">·</span>
           <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-700 transition-colors">🌐 Developer Portfolio</a>
         </div>
-        <p className="text-xs text-gray-600 font-700 mt-4">© 2026 Celso Store. All rights reserved.</p>
-        <p className="text-xs text-gray-500 font-700 mt-1">Proudly Made with ❤️ by <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-500 font-700 transition-colors">Hermz</a></p>
+        <p className="text-xs text-gray-400 mt-4">© 2026 Celso Store. All rights reserved.</p>
+        <p className="text-xs text-gray-300 mt-1">Proudly Made with ❤️ by <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-500 font-700 transition-colors">Hermz</a></p>
       </footer>
 
       {showContact && (
@@ -143,25 +143,20 @@ export default function CustomerApp({ onAdmin }) {
     return () => window.removeEventListener('celso_products_updated', reload);
   }, []);
 
-  // Load products from shared DB on mount so all devices see same products
+  // On mount: load orders history + products from shared DB
   useEffect(() => {
     dbRead().then(data => {
-      // Load orders history
       if (data.orders && data.orders.length > 0) {
         setOrders(data.orders);
       }
-      // Load products
       if (data.products && data.products.length > 0) {
         setAllProducts(data.products);
         localStorage.setItem('celso_products_custom', JSON.stringify(data.products));
-        window.dispatchEvent(new Event('celso_products_updated'));
       }
-      // Load gcash requests for history
-    }).catch(e => console.error('Initial DB load error:', e));
+    }).catch(e => console.error('DB load error:', e));
   }, []);
 
   useEffect(() => ls.set('celso_cart', cart), [cart]);
-  // orders are stored in shared DB, not localStorage
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
@@ -191,17 +186,17 @@ export default function CustomerApp({ onAdmin }) {
       timestamp: new Date().toISOString(),
       status: 'pending',
     };
+    // Show immediately in UI
+    setOrders(prev => [o, ...prev]);
     setConfirmedOrder(o);
     setCart([]);
     setCheckoutOpen(false);
-    // Save to shared database so admin sees it from any device
-    try {
-      const updatedOrders = await dbAddOrder(o);
+    // Save to shared DB in background
+    dbAddOrder(o).then(updatedOrders => {
       setOrders(updatedOrders);
-    } catch(e) {
-      // Fallback: at least show locally
-      setOrders(prev => [o, ...prev]);
-    }
+    }).catch(e => {
+      console.error('Order DB save error:', e);
+    });
   };
 
   const filtered = allProducts.filter(p => {
