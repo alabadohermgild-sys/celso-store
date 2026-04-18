@@ -80,7 +80,8 @@ export function AdminPanel({ onLogout }) {
       const data = await dbRead();
       setOrders(data.orders || []);
       setGcashReqs(data.gcashRequests || []);
-      if (data.products && data.products.length > 0) {
+      // Only update products from DB if no local write is pending
+      if (data.products && data.products.length > 0 && !window._savingProducts) {
         setProducts(data.products);
         localStorage.setItem(PROD_KEY, JSON.stringify(data.products));
         window.dispatchEvent(new Event('celso_products_updated'));
@@ -132,14 +133,22 @@ export function AdminPanel({ onLogout }) {
 
   // Save products to shared storage AND shared DB so all devices see them
   const saveProducts = async (p) => {
+    window._savingProducts = true;
     setProducts(p);
     localStorage.setItem(PROD_KEY, JSON.stringify(p));
     window.dispatchEvent(new Event('celso_products_updated'));
     try {
       const data = await dbRead();
-      await dbWrite({ ...data, products: p });
-      console.log('Products saved to DB:', p.length, 'items');
+      // Strip base64 images before saving to DB (JSONBin 100KB limit)
+      // Products with uploaded images keep emoji as fallback in DB
+      const pForDB = p.map(prod => ({
+        ...prod,
+        image: prod.image && prod.image.startsWith('data:') ? null : prod.image,
+      }));
+      await dbWrite({ ...data, products: pForDB });
+      console.log('Products saved to DB:', pForDB.length, 'items');
     } catch(e) { console.error('Product DB save error:', e); }
+    finally { window._savingProducts = false; }
   };
 
   const saveCategories = (c) => {

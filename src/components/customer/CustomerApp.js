@@ -182,16 +182,26 @@ export default function CustomerApp({ onAdmin }) {
     const o = {
       id: 'ORD-' + Date.now().toString().slice(-6),
       ...orderData,
-      cart: [...cart],
+      // Strip base64 images from cart items - too large for DB (use emoji as fallback)
+      cart: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        qty: item.qty,
+        emoji: item.emoji || '📦',
+        unit: item.unit || 'per piece',
+        category: item.category,
+      })),
       timestamp: new Date().toISOString(),
       status: 'pending',
     };
-    // Show immediately in UI
-    setOrders(prev => [o, ...prev]);
-    setConfirmedOrder(o);
+    // Show immediately in UI (use full cart with images for local display)
+    const oFull = { ...o, cart: cart.map(i => ({ ...i })) };
+    setOrders(prev => [oFull, ...prev]);
+    setConfirmedOrder(oFull);
     setCart([]);
     setCheckoutOpen(false);
-    // Save to shared DB in background
+    // Save stripped version to DB in background (no base64 images)
     dbAddOrder(o).then(updatedOrders => {
       setOrders(updatedOrders);
     }).catch(e => {

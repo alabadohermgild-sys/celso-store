@@ -276,9 +276,23 @@ export function GcashServices() {
     setRequests(prev => [req, ...prev]);
     setSubmitted(true);
     setAmount(''); setName(''); setNumber(''); setProofPreview(null);
-    // Save to shared DB in background - both cashin AND cashout
-    dbAddGcash(req).then(updatedReqs => {
-      setRequests(updatedReqs);
+    // Save to shared DB - strip base64 proof (too large), store proof locally only
+    const reqForDB = { ...req, proofPreview: req.proofPreview ? '[image_uploaded]' : null };
+    // Save full req with image to localStorage for local viewing
+    try {
+      const localReqs = JSON.parse(localStorage.getItem('celso_gcash_local') || '[]');
+      localStorage.setItem('celso_gcash_local', JSON.stringify([req, ...localReqs]));
+    } catch(e) {}
+    dbAddGcash(reqForDB).then(updatedReqs => {
+      // Merge with local proof images
+      try {
+        const localReqs = JSON.parse(localStorage.getItem('celso_gcash_local') || '[]');
+        const merged = updatedReqs.map(r => {
+          const local = localReqs.find(l => l.id === r.id);
+          return local ? { ...r, proofPreview: local.proofPreview } : r;
+        });
+        setRequests(merged);
+      } catch(e) { setRequests(updatedReqs); }
     }).catch(e => {
       console.error('GCash DB save error:', e);
     });
