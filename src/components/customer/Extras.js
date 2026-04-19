@@ -11,7 +11,7 @@ function PageFooter() {
     <>
       <footer className="mt-12 border-t border-gray-200 pt-8 pb-6 px-4 text-center">
         <p className="text-base font-900 text-gray-800">🏪 Celso Store</p>
-        <p className="text-sm text-gray-600 font-700 mt-0.5">Happy to serve you. ☺️</p>
+        <p className="text-sm text-gray-500 font-700 mt-0.5">Happy to serve you. ☺️</p>
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-500 font-700 flex-wrap">
           <button onClick={() => setShowTerms(true)} className="hover:text-green-600 transition-colors underline underline-offset-2">Terms of Service</button>
           <span className="text-gray-300">·</span>
@@ -184,7 +184,7 @@ export function ProductModal({ product, cartQty, onAdd, onUpdateQty, onClose }) 
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
         <div className="bg-green-50 flex items-center justify-center h-48 sm:h-60 relative overflow-hidden">
-          {product.image && product.image.startsWith('data:') ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" onError={e => e.target.style.display='none'} /> : <span className="text-8xl">{product.emoji}</span>}
+          {product.image ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" /> : <span className="text-8xl">{product.emoji}</span>}
           <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-gray-700 font-700 text-lg shadow-sm hover:bg-white transition-colors">×</button>
           {product.tags?.includes('bestseller') && <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-800 px-3 py-1 rounded-full">Bestseller</span>}
         </div>
@@ -227,18 +227,16 @@ export function GcashServices() {
   const [copied, setCopied] = useState(false);
   const [requests, setRequests] = useState([]);
 
-  // Load gcash history from DB and merge with local proof images
+  // Load gcash history from DB, merge with locally stored proof images
   useEffect(() => {
     dbRead().then(data => {
       if (data.gcashRequests && data.gcashRequests.length > 0) {
-        try {
-          const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
-          const merged = data.gcashRequests.map(r => ({
-            ...r,
-            proofPreview: localProofs[r.id] || r.proofPreview || null,
-          }));
-          setRequests(merged);
-        } catch { setRequests(data.gcashRequests); }
+        const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
+        const merged = data.gcashRequests.map(r => ({
+          ...r,
+          proofPreview: localProofs[r.id] || (r.proofPreview && r.proofPreview !== '[img]' ? r.proofPreview : null),
+        }));
+        setRequests(merged);
       }
     }).catch(e => console.error('GCash history load error:', e));
   }, []);
@@ -283,18 +281,26 @@ export function GcashServices() {
     setRequests(prev => [req, ...prev]);
     setSubmitted(true);
     setAmount(''); setName(''); setNumber(''); setProofPreview(null);
-    // Save proof image locally (too large for DB)
-    try {
-      const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
-      if (req.proofPreview) localProofs[req.id] = req.proofPreview;
-      localStorage.setItem('celso_gcash_proofs', JSON.stringify(localProofs));
-    } catch(e) {}
-    // Save to DB (proof auto-stripped to [img] by stripBase64)
+    // Save proof image locally keyed by request ID (too large for DB)
+    if (req.proofPreview) {
+      try {
+        const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
+        localProofs[req.id] = req.proofPreview;
+        localStorage.setItem('celso_gcash_proofs', JSON.stringify(localProofs));
+      } catch(e) { console.error('Proof save error:', e); }
+    }
+    // Save to DB - stripBase64 auto-marks proof as [img] in DB
     dbAddGcash(req).then(updatedReqs => {
-      setRequests(updatedReqs);
-    }).catch(e => {
-      console.error('GCash DB save error:', e);
-    });
+      // Re-merge local proofs after DB update
+      try {
+        const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
+        const merged = updatedReqs.map(r => ({
+          ...r,
+          proofPreview: localProofs[r.id] || r.proofPreview || null,
+        }));
+        setRequests(merged);
+      } catch { setRequests(updatedReqs); }
+    }).catch(e => console.error('GCash DB save error:', e));
   };
 
   if (submitted) return (

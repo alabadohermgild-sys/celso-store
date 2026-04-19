@@ -14,11 +14,12 @@ const loadProds = () => {
   try {
     const s = localStorage.getItem('celso_products_custom');
     const prods = s ? JSON.parse(s) : BASE_PRODUCTS;
+    // Merge with locally stored images (base64 not saved to DB)
     try {
       const imgMap = JSON.parse(localStorage.getItem('celso_product_images') || '{}');
-      return prods.map(p => ({ ...p, image: imgMap[p.id] || p.image || null, unit: p.unit || 'per piece' }));
-    } catch { return prods.map(p => ({ ...p, unit: p.unit || 'per piece' })); }
-  } catch { return BASE_PRODUCTS.map(p => ({ ...p, unit: p.unit || 'per piece' })); }
+      return prods.map(p => ({ ...p, image: imgMap[p.id] || p.image || null }));
+    } catch { return prods; }
+  } catch { return BASE_PRODUCTS; }
 };
 const loadCats = () => {
   try { const s = localStorage.getItem('celso_categories_custom'); return s ? JSON.parse(s) : BASE_CATEGORIES; }
@@ -33,7 +34,7 @@ function PageFooter() {
     <>
       <footer className="border-t border-gray-200 mt-8 pt-8 pb-6 px-6 text-center">
         <p className="text-base font-900 text-gray-800">🏪 Celso Store</p>
-        <p className="text-sm text-gray-600 font-700 mt-0.5">Happy to serve you. ☺️</p>
+        <p className="text-sm text-gray-500 font-700 mt-0.5">Happy to serve you. ☺️</p>
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-500 font-700 flex-wrap">
           <button onClick={() => setShowTerms(true)} className="hover:text-green-600 transition-colors underline underline-offset-2">Terms of Service</button>
           <span className="text-gray-300">·</span>
@@ -48,8 +49,8 @@ function PageFooter() {
           <span className="text-gray-300 text-xs">·</span>
           <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-700 transition-colors">🌐 Developer Portfolio</a>
         </div>
-        <p className="text-xs text-gray-400 mt-4">© 2026 Celso Store. All rights reserved.</p>
-        <p className="text-xs text-gray-300 mt-1">Proudly Made with ❤️ by <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-500 font-700 transition-colors">Hermz</a></p>
+        <p className="text-xs text-gray-600 font-700 mt-4">© 2026 Celso Store. All rights reserved.</p>
+        <p className="text-xs text-gray-500 font-700 mt-1">Proudly Made with ❤️ by <a href="https://hermzz.wuaze.com/" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-500 font-700 transition-colors">Hermz</a></p>
       </footer>
 
       {showContact && (

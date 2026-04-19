@@ -80,7 +80,8 @@ export function AdminPanel({ onLogout }) {
       const data = await dbRead();
       setOrders(data.orders || []);
       setGcashReqs(data.gcashRequests || []);
-      // Products NOT updated from 15s refresh - local state is source of truth
+      // Products: only load from DB on first mount (setDbLoading still true)
+      // After that, local state is source of truth to avoid flicker
     } catch(e) { console.error('Admin refresh error:', e); }
     finally { setDbLoading(false); }
   };
@@ -91,14 +92,8 @@ export function AdminPanel({ onLogout }) {
       setOrders(data.orders || []);
       setGcashReqs(data.gcashRequests || []);
       if (data.products && data.products.length > 0) {
-        const imgMap = JSON.parse(localStorage.getItem('celso_product_images') || '{}');
-        const merged = data.products.map(p => ({
-          ...p,
-          image: imgMap[p.id] || p.image || null,
-          unit: p.unit || 'per piece',
-        }));
-        setProducts(merged);
-        localStorage.setItem(PROD_KEY, JSON.stringify(merged));
+        setProducts(data.products);
+        localStorage.setItem(PROD_KEY, JSON.stringify(data.products));
         window.dispatchEvent(new Event('celso_products_updated'));
       }
       setDbLoading(false);
@@ -128,7 +123,6 @@ export function AdminPanel({ onLogout }) {
 
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
-  const [showManageCategories, setShowManageCategories] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
   const [viewReceipt, setViewReceipt] = useState(null); // image url to view
   const [viewOrderReceipt, setViewOrderReceipt] = useState(null); // order with proof
@@ -288,8 +282,8 @@ export function AdminPanel({ onLogout }) {
                           🖼️ View GCash Receipt
                         </button>
                       )}
-                      {order.payMethod === 'gcash' && (
-                        <p className="text-xs text-blue-700 font-700 bg-blue-50 px-2 py-1 rounded-lg">📱 GCash payment - ref: {order.gcashRef || 'pending'}</p>
+                      {order.payMethod === 'gcash' && !order.proofPreview && (
+                        <p className="text-xs text-amber-700 font-700 bg-amber-50 px-2 py-1 rounded-lg">⚠️ No receipt uploaded yet</p>
                       )}
 
                       <div className="flex flex-wrap gap-1 py-1">
@@ -352,15 +346,15 @@ export function AdminPanel({ onLogout }) {
                       </div>
 
                       {/* View uploaded proof */}
-                      {req.proofPreview && req.proofPreview !== '[img]' && req.proofPreview.startsWith('data:') && (
+                      {req.proofPreview && req.proofPreview !== '[img]' && (
                         <button onClick={() => setViewReceipt(req.proofPreview)}
                           className="flex items-center gap-1.5 text-xs font-800 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors w-full justify-center">
                           🖼️ View Payment Proof
                         </button>
                       )}
-                      {(!req.proofPreview || req.proofPreview === '[img]') && req.service === 'cashout' && (
-                        <div className="flex items-center gap-1.5 text-xs font-700 text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg w-full justify-center">
-                          📸 Customer uploaded screenshot
+                      {req.proofPreview === '[img]' && (
+                        <div className="flex items-center gap-1.5 text-xs font-800 text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg w-full justify-center">
+                          📸 Screenshot uploaded (view on customer device)
                         </div>
                       )}
 
@@ -455,14 +449,6 @@ export function AdminPanel({ onLogout }) {
         />
       )}
 
-      {showManageCategories && (
-        <ManageCategoriesModal
-          categories={categories}
-          onClose={() => setShowManageCategories(false)}
-          onSave={(updated) => { saveCategories(updated); setShowManageCategories(false); }}
-        />
-      )}
-
       {/* Receipt viewer - GCash service proof */}
       {viewReceipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => setViewReceipt(null)}>
@@ -501,7 +487,7 @@ export function AdminPanel({ onLogout }) {
 
 // ── ADD PRODUCT MODAL ─────────────────────────────────────────────────────────
 function AddProductModal({ categories, onClose, onSave }) {
-  const [form, setForm] = useState({ name: '', price: '', stock: '', emoji: '📦', category: 'snacks', description: '', tags: [], image: '' });
+  const [form, setForm] = useState({ name: '', price: '', stock: '', emoji: '📦', category: 'snacks', description: '', tags: [], image: '', unit: 'per piece' });
   const [imagePreview, setImagePreview] = useState(null);
   const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -518,7 +504,7 @@ function AddProductModal({ categories, onClose, onSave }) {
 
   const save = () => {
     if (!form.name || !form.price || !form.stock) return;
-    onSave({ ...form, id: Date.now(), price: parseFloat(form.price), stock: parseInt(form.stock) });
+    onSave({ ...form, id: Date.now(), price: parseFloat(form.price), stock: parseInt(form.stock), unit: form.unit || 'per piece', tags: form.tags || [] });
   };
 
   const catOptions = categories.filter(c => c.id !== 'all').map(c => c.id);
@@ -589,6 +575,79 @@ function AddProductModal({ categories, onClose, onSave }) {
           </div>
 
           <div>
+            <label className="text-sm font-800 text-gray-800 block mb-1.5">Sold As (Unit)</label>
+            <select value={form.unit} onChange={e => upd('unit', e.target.value)}
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base outline-none focus:border-green-500 text-gray-900 bg-white">
+              <optgroup label="─── Piece Units">
+                <option value="per piece">per piece</option>
+                <option value="per each">per each</option>
+                <option value="per unit">per unit</option>
+                <option value="per item">per item</option>
+                <option value="per pair">per pair</option>
+                <option value="per set">per set</option>
+                <option value="per individual">per individual</option>
+              </optgroup>
+              <optgroup label="─── Tray / Flat Container">
+                <option value="per tray">per tray</option>
+                <option value="per crate">per crate</option>
+                <option value="per flat">per flat</option>
+                <option value="per punnet">per punnet</option>
+                <option value="per blister pack">per blister pack</option>
+                <option value="per egg tray">per egg tray</option>
+              </optgroup>
+              <optgroup label="─── Box / Closed Container">
+                <option value="per box">per box</option>
+                <option value="per case">per case</option>
+                <option value="per carton">per carton</option>
+                <option value="per pack">per pack</option>
+                <option value="per packet">per packet</option>
+                <option value="per tube">per tube</option>
+                <option value="per jar">per jar</option>
+                <option value="per can">per can</option>
+                <option value="per drum">per drum</option>
+                <option value="per wrapper">per wrapper</option>
+                <option value="per container">per container</option>
+              </optgroup>
+              <optgroup label="─── Bag / Flexible Container">
+                <option value="per bag">per bag</option>
+                <option value="per sack">per sack</option>
+                <option value="per pouch">per pouch</option>
+                <option value="per sachet">per sachet</option>
+                <option value="per polybag">per polybag</option>
+              </optgroup>
+              <optgroup label="─── Tie / Bundled">
+                <option value="per tie">per tie</option>
+                <option value="per bundle">per bundle</option>
+                <option value="per bale">per bale</option>
+                <option value="per bunch">per bunch</option>
+                <option value="per dozen">per dozen</option>
+                <option value="per gross">per gross</option>
+                <option value="per hank">per hank</option>
+                <option value="per sheaf">per sheaf</option>
+              </optgroup>
+              <optgroup label="─── Bottle / Liquid">
+                <option value="per bottle">per bottle</option>
+                <option value="per liter">per liter</option>
+                <option value="per ml">per ml</option>
+                <option value="per gallon">per gallon</option>
+              </optgroup>
+              <optgroup label="─── Weight / Measurement">
+                <option value="per kilo">per kilo</option>
+                <option value="per gram">per gram</option>
+                <option value="per pound">per pound</option>
+                <option value="per meter">per meter</option>
+                <option value="per cm">per cm</option>
+                <option value="per foot">per foot</option>
+                <option value="per yard">per yard</option>
+                <option value="per roll">per roll</option>
+                <option value="per sheet">per sheet</option>
+                <option value="per ream">per ream</option>
+                <option value="per pallet">per pallet</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div>
             <label className="text-sm font-800 text-gray-800 block mb-2">Tags</label>
             <div className="flex gap-2">
               {['bestseller', 'popular'].map(tag => (
@@ -651,57 +710,6 @@ function AddCategoryModal({ onClose, onSave }) {
               Add Category
             </button>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ManageCategoriesModal({ categories, onClose, onSave }) {
-  const [cats, setCats] = React.useState(categories.filter(c => c.id !== 'all'));
-  const [editing, setEditing] = React.useState(null);
-  const [editName, setEditName] = React.useState('');
-  const [editEmoji, setEditEmoji] = React.useState('');
-
-  const startEdit = (cat) => { setEditing(cat.id); setEditName(cat.name); setEditEmoji(cat.emoji); };
-  const saveEdit = () => {
-    setCats(prev => prev.map(c => c.id === editing ? { ...c, name: editName, emoji: editEmoji } : c));
-    setEditing(null);
-  };
-  const deletecat = (id) => { if (window.confirm('Delete this category?')) setCats(prev => prev.filter(c => c.id !== id)); };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-900 text-gray-900">Manage Categories</h3>
-          <button onClick={onClose} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-700 text-lg hover:bg-gray-200">x</button>
-        </div>
-        <div className="space-y-2">
-          {cats.map(cat => (
-            <div key={cat.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-              {editing === cat.id ? (
-                <>
-                  <input value={editEmoji} onChange={e => setEditEmoji(e.target.value)} className="w-12 border border-gray-200 rounded-lg px-2 py-1.5 text-xl text-center outline-none focus:border-green-500" />
-                  <input value={editName} onChange={e => setEditName(e.target.value)} className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-green-500 text-gray-900" />
-                  <button onClick={saveEdit} className="px-3 py-1.5 bg-green-600 text-white text-xs font-800 rounded-lg hover:bg-green-700">Save</button>
-                  <button onClick={() => setEditing(null)} className="px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-800 rounded-lg hover:bg-gray-300">Cancel</button>
-                </>
-              ) : (
-                <>
-                  <span className="text-xl">{cat.emoji}</span>
-                  <span className="flex-1 text-sm font-700 text-gray-900">{cat.name}</span>
-                  <button onClick={() => startEdit(cat)} className="px-2.5 py-1.5 bg-blue-50 text-blue-700 text-xs font-800 rounded-lg hover:bg-blue-100 border border-blue-200">Edit</button>
-                  <button onClick={() => deletecat(cat.id)} className="px-2.5 py-1.5 bg-red-50 text-red-600 text-xs font-800 rounded-lg hover:bg-red-100 border border-red-200">Delete</button>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-3 mt-5">
-          <button onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-sm font-800 text-gray-700 hover:bg-gray-50">Cancel</button>
-          <button onClick={() => onSave([{ id: 'all', name: 'All', emoji: '🛒' }, ...cats])} className="flex-1 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-800 active:scale-95">Save Changes</button>
         </div>
       </div>
     </div>
