@@ -184,7 +184,11 @@ export function ProductModal({ product, cartQty, onAdd, onUpdateQty, onClose }) 
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
         <div className="bg-green-50 flex items-center justify-center h-48 sm:h-60 relative overflow-hidden">
-          {product.image ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" /> : <span className="text-8xl">{product.emoji}</span>}
+          {product.image && (product.image.startsWith('data:') || product.image.startsWith('http'))
+            ? <img src={product.image} alt={product.name} className="w-full h-full object-cover"
+                onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+            : null}
+          <span className={`text-8xl items-center justify-center ${product.image && (product.image.startsWith('data:') || product.image.startsWith('http')) ? 'hidden' : 'flex'}`}>{product.emoji}</span>
           <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-gray-700 font-700 text-lg shadow-sm hover:bg-white transition-colors">×</button>
           {product.tags?.includes('bestseller') && <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-800 px-3 py-1 rounded-full">Bestseller</span>}
         </div>

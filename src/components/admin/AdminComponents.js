@@ -276,14 +276,11 @@ export function AdminPanel({ onLogout }) {
                       )}
 
                       {/* View GCash receipt if customer uploaded one */}
-                      {order.proofPreview && (
-                        <button onClick={() => setViewOrderReceipt(order)}
-                          className="flex items-center gap-1.5 text-xs font-800 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors">
-                          🖼️ View GCash Receipt
-                        </button>
-                      )}
-                      {order.payMethod === 'gcash' && !order.proofPreview && (
-                        <p className="text-xs text-amber-700 font-700 bg-amber-50 px-2 py-1 rounded-lg">⚠️ No receipt uploaded yet</p>
+                      {order.payMethod === 'gcash' && (
+                        <div className="flex items-center gap-1.5 text-xs font-800 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-1.5 rounded-lg">
+                          📱 GCash Ref: <strong>{order.gcashRef || 'not provided'}</strong>
+                          {order.proofPreview === '[uploaded]' && <span className="ml-1 text-blue-700">· ✅ Proof submitted</span>}
+                        </div>
                       )}
 
                       <div className="flex flex-wrap gap-1 py-1">
@@ -346,13 +343,13 @@ export function AdminPanel({ onLogout }) {
                       </div>
 
                       {/* View uploaded proof */}
-                      {req.proofPreview && req.proofPreview !== '[img]' && (
+                      {req.proofPreview && req.proofPreview !== '[img]' && req.proofPreview.startsWith('data:') && (
                         <button onClick={() => setViewReceipt(req.proofPreview)}
                           className="flex items-center gap-1.5 text-xs font-800 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors w-full justify-center">
                           🖼️ View Payment Proof
                         </button>
                       )}
-                      {req.proofPreview === '[img]' && (
+                      {(req.proofPreview === '[img]' || (req.proofPreview && !req.proofPreview.startsWith('data:'))) && (
                         <div className="flex items-center gap-1.5 text-xs font-800 text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg w-full justify-center">
                           📸 Screenshot uploaded (view on customer device)
                         </div>
@@ -398,10 +395,11 @@ export function AdminPanel({ onLogout }) {
               {products.map(p => (
                 <div key={p.id} className={`bg-white rounded-2xl shadow-sm border overflow-hidden ${p.stock === 0 ? 'border-red-200' : 'border-gray-200'}`}>
                   <div className="bg-green-50 h-28 flex items-center justify-center relative overflow-hidden">
-                    {p.image
-                      ? <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
-                      : <span className="text-4xl">{p.emoji}</span>
-                    }
+                    {p.image && (p.image.startsWith('data:') || p.image.startsWith('http'))
+                      ? <img src={p.image} alt={p.name} className="w-full h-full object-cover"
+                          onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+                      : null}
+                    <span className={`text-4xl items-center justify-center ${p.image && (p.image.startsWith('data:') || p.image.startsWith('http')) ? 'hidden' : 'flex'}`}>{p.emoji}</span>
                     {p.stock === 0 && (
                       <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
                         <span className="bg-red-500 text-white text-xs font-800 px-2 py-0.5 rounded-full">Out of Stock</span>
