@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CONFIG, ORDER_STATUSES, STATUS_COLORS, dbRead, dbSaveProducts, dbUpdateOrderStatus, dbUpdateGcashStatus } from '../../lib/config';
+import { CONFIG, ORDER_STATUSES, STATUS_COLORS, dbRead, dbSaveProducts, dbUpdateOrderStatus, dbUpdateGcashStatus, uploadToImgBB } from '../../lib/config';
 import { StatusBadge, EmptyState } from '../shared/UI';
 
 // shared product storage key - same key used by CustomerApp
@@ -282,7 +282,12 @@ export function AdminPanel({ onLogout }) {
                       {order.payMethod === 'gcash' && (
                         <div className="flex items-center gap-1.5 text-xs font-800 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-1.5 rounded-lg">
                           📱 GCash Ref: <strong>{order.gcashRef || 'not provided'}</strong>
-                          {order.proofPreview === '[uploaded]' && <span className="ml-1 text-blue-700">· ✅ Proof submitted</span>}
+                          {order.proofPreview && order.proofPreview !== '[uploaded]' && (
+                            <button onClick={() => setViewReceipt(order.proofPreview)} className="mt-1 flex items-center gap-1.5 text-xs font-800 text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-2 rounded-lg transition-colors w-full">
+                              🖼️ View GCash Payment Proof
+                            </button>
+                          )}
+                          {order.proofPreview === '[uploaded]' && <span className="text-xs text-blue-700 font-700">✅ Proof submitted (old order)</span>
                         </div>
                       )}
 
@@ -346,13 +351,13 @@ export function AdminPanel({ onLogout }) {
                       </div>
 
                       {/* View uploaded proof */}
-                      {req.proofPreview && req.proofPreview !== '[img]' && req.proofPreview.startsWith('data:') && (
+                      {req.proofPreview && req.proofPreview !== '[img]' && (
                         <button onClick={() => setViewReceipt(req.proofPreview)}
                           className="flex items-center gap-1.5 text-xs font-800 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors w-full justify-center">
                           🖼️ View Payment Proof
                         </button>
                       )}
-                      {(req.proofPreview === '[img]' || (req.proofPreview && !req.proofPreview.startsWith('data:'))) && (
+                      {!req.proofPreview || req.proofPreview === '[img]' && (
                         <div className="flex items-center gap-1.5 text-xs font-800 text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg w-full justify-center">
                           📸 Screenshot uploaded (view on customer device)
                         </div>
@@ -503,12 +508,21 @@ function AddProductModal({ categories, onClose, onSave }) {
     reader.readAsDataURL(file);
   };
 
-  const save = () => {
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
     if (!form.name || !form.price || !form.stock) return;
     const price = parseFloat(form.price);
     const stock = parseInt(form.stock);
     if (isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) return;
-    onSave({ ...form, id: Date.now(), price, stock, unit: form.unit || 'per piece', tags: form.tags || [] });
+    setSaving(true);
+    let imageUrl = form.image;
+    // Upload product image to ImgBB so all devices see it
+    if (form.image && form.image.startsWith('data:')) {
+      const uploaded = await uploadToImgBB(form.image);
+      if (uploaded) imageUrl = uploaded;
+    }
+    setSaving(false);
+    onSave({ ...form, id: Date.now(), price, stock, image: imageUrl, unit: form.unit || 'per piece', tags: form.tags || [] });
   };
 
   const catOptions = categories.filter(c => c.id !== 'all').map(c => c.id);
@@ -666,9 +680,9 @@ function AddProductModal({ categories, onClose, onSave }) {
 
           <div className="flex gap-3 pt-2">
             <button onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-sm font-800 text-gray-700 hover:bg-gray-50 transition-all">Cancel</button>
-            <button onClick={save} disabled={!form.name || !form.price || !form.stock}
+            <button onClick={save} disabled={!form.name || !form.price || !form.stock || saving}
               className="flex-1 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-800 transition-all disabled:opacity-40 active:scale-95">
-              Save Product
+              {saving ? '⏳ Uploading...' : 'Save Product'}
             </button>
           </div>
         </div>
