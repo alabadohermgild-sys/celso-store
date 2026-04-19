@@ -134,26 +134,24 @@ export async function dbUpdateGcashStatus(id, status) {
 }
 
 // ── ImgBB Image Upload ────────────────────────────────────────────────────────
-const IMGBB_API_KEY = '54446f7ac76c1f77a942537140abe21es';
+// Get free API key at https://api.imgbb.com
+const IMGBB_API_KEY = '54446f7ac76c1f77a942537140abe21e';
 
-export async function uploadImageToImgBB(base64String) {
+export async function uploadToImgBB(base64String) {
+  if (!base64String) return null;
+  if (base64String.startsWith('http')) return base64String; // already a URL
   try {
-    // Remove data:image/...;base64, prefix
     const base64Data = base64String.includes(',') ? base64String.split(',')[1] : base64String;
-    const formData = new FormData();
-    formData.append('key', IMGBB_API_KEY);
-    formData.append('image', base64Data);
-    const res = await fetch('https://api.imgbb.com/1/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    const form = new FormData();
+    form.append('key', IMGBB_API_KEY);
+    form.append('image', base64Data);
+    const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form });
     const json = await res.json();
-    if (json.success) {
-      return json.data.url; // returns a permanent URL
-    }
-    throw new Error('ImgBB upload failed: ' + json.error?.message);
+    if (json.success) return json.data.url;
+    console.error('ImgBB error:', json.error);
+    return null;
   } catch(e) {
-    console.error('ImgBB upload error:', e);
+    console.error('ImgBB upload failed:', e);
     return null;
   }
 }

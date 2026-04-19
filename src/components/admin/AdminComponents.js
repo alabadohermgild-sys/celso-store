@@ -143,20 +143,23 @@ export function AdminPanel({ onLogout }) {
     try { await dbUpdateGcashStatus(id, status); } catch(e) { console.error(e); }
   };
 
-  // Save products: full data (with images) to localStorage, stripped to DB
+  // Save products: full data (with images) to localStorage, images stripped for DB
   const saveProducts = async (p) => {
-    // Save FULL products (with base64 images) to localStorage for THIS device
     setProducts(p);
     localStorage.setItem(PROD_KEY, JSON.stringify(p));
-    // Save images map separately so other devices can use emoji fallback
-    const imageMap = {};
-    p.forEach(prod => { if (prod.image && prod.image.startsWith('data:')) imageMap[prod.id] = prod.image; });
+    // Build and save imageMap so all devices can retrieve images
+    const existingMap = JSON.parse(localStorage.getItem('celso_product_images') || '{}');
+    const imageMap = { ...existingMap };
+    p.forEach(prod => {
+      if (prod.image && (prod.image.startsWith('data:') || prod.image.startsWith('http'))) {
+        imageMap[prod.id] = prod.image;
+      }
+    });
     localStorage.setItem('celso_product_images', JSON.stringify(imageMap));
     window.dispatchEvent(new Event('celso_products_updated'));
-    // Save to DB (base64 stripped automatically by config.js stripBase64)
     try {
       await dbSaveProducts(p);
-      console.log('Products saved to DB:', p.length, 'items');
+      console.log('Products saved to DB:', p.length);
     } catch(e) { console.error('Product DB save error:', e); }
   };
 
@@ -277,22 +280,9 @@ export function AdminPanel({ onLogout }) {
 
                       {/* View GCash receipt if customer uploaded one */}
                       {order.payMethod === 'gcash' && (
-                        <div className="flex flex-col gap-1.5">
-                          <div className="text-xs font-800 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-1.5 rounded-lg">
-                            📱 GCash Ref: <strong>{order.gcashRef || 'not provided'}</strong>
-                          </div>
-                          {order.proofPreview && order.proofPreview !== '[uploaded]' && (
-                            <button onClick={() => setViewReceipt(order.proofPreview)}
-                              className="flex items-center gap-1.5 text-xs font-800 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors">
-                              🖼️ View GCash Proof
-                            </button>
-                          )}
-                          {order.proofPreview === '[uploaded]' && (
-                            <div className="text-xs font-700 text-blue-700 bg-blue-50 border border-blue-200 px-2 py-1.5 rounded-lg">✅ Proof submitted (re-order to view)</div>
-                          )}
-                          {order.payMethod === 'gcash' && !order.proofPreview && (
-                            <div className="text-xs font-700 text-amber-700 bg-amber-50 px-2 py-1 rounded-lg">⏳ No proof uploaded yet</div>
-                          )}
+                        <div className="flex items-center gap-1.5 text-xs font-800 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-1.5 rounded-lg">
+                          📱 GCash Ref: <strong>{order.gcashRef || 'not provided'}</strong>
+                          {order.proofPreview === '[uploaded]' && <span className="ml-1 text-blue-700">· ✅ Proof submitted</span>}
                         </div>
                       )}
 
@@ -463,14 +453,9 @@ export function AdminPanel({ onLogout }) {
       {/* Receipt viewer - GCash service proof */}
       {viewReceipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => setViewReceipt(null)}>
-          <div className="relative max-w-lg w-full" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setViewReceipt(null)} className="absolute -top-10 right-0 text-white font-800 text-base bg-white/20 px-3 py-1 rounded-lg hover:bg-white/40">✕ Close</button>
-            <img src={viewReceipt} alt="Payment proof" className="w-full rounded-2xl shadow-2xl max-h-screen object-contain"
-              onError={e => { e.target.src=''; e.target.alt='Image failed to load'; }} />
-            <a href={viewReceipt} target="_blank" rel="noreferrer"
-              className="mt-3 flex items-center justify-center gap-2 bg-white text-gray-900 font-800 text-sm py-2.5 rounded-xl hover:bg-gray-100 transition-colors">
-              🔗 Open full image in new tab
-            </a>
+          <div className="relative max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setViewReceipt(null)} className="absolute -top-10 right-0 text-white font-700 text-lg hover:text-gray-300">✕ Close</button>
+            <img src={viewReceipt} alt="Payment proof" className="w-full rounded-2xl shadow-2xl" />
           </div>
         </div>
       )}

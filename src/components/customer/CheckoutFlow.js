@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CONFIG, ls, uploadImageToImgBB } from '../../lib/config';
+import { CONFIG, ls, uploadToImgBB } from '../../lib/config';
 import { Upload } from 'lucide-react';
 
 const STEPS = ['Order Type', 'Payment', 'Your Info', 'GCash Payment', 'Confirm'];
@@ -7,8 +7,8 @@ const STEPS = ['Order Type', 'Payment', 'Your Info', 'GCash Payment', 'Confirm']
 function Footer() {
   return (
     <div className="text-center py-4 px-4 border-t border-gray-100 mt-2">
-      <p className="text-xs text-gray-400 font-600">Celso Store • Proudly Serving You!</p>
-      <p className="text-xs text-gray-300 mt-0.5">Secure checkout • No account required • Campus delivery</p>
+      <p className="text-xs text-gray-700 font-800">Celso Store • Happy to serve you. ☺️</p>
+      <p className="text-xs text-gray-600 font-700 mt-0.5">Secure checkout • No account needed • Fast delivery</p>
     </div>
   );
 }
@@ -42,17 +42,25 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
     return true;
   };
 
-  const next = () => {
+  const next = async () => {
     if (!canNext()) return;
     if (step === 2) {
-      // Save customer name/phone for next time
       ls.set('celso_customer', { name: info.name, phone: info.phone });
       setNameSaved(false);
     }
     if (step === 1 && payMethod !== 'gcash') { setStep(2); return; }
     if (step === 2 && payMethod !== 'gcash') { setStep(4); return; }
     if (step === 4) {
-      onPlace({ orderType, deliveryZone: zone, payMethod, ...info, gcashRef, proofPreview, subtotal, deliveryFee, gcashFee, total });
+      // Upload proof image to ImgBB so admin can view from any device
+      setUploading(true);
+      let proofUrl = null;
+      if (proofPreview) {
+        proofUrl = await uploadToImgBB(proofPreview);
+        if (!proofUrl) proofUrl = proofPreview; // fallback to base64 if upload fails
+      }
+      setUploading(false);
+      onPlace({ orderType, deliveryZone: zone, payMethod, ...info, gcashRef,
+        proofPreview: proofUrl, subtotal, deliveryFee, gcashFee, total });
       return;
     }
     setStep(s => s + 1);
@@ -91,7 +99,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0 bg-white">
           <div>
-            <p className="text-xs text-gray-400 font-700 uppercase tracking-wide">
+            <p className="text-xs text-gray-700 font-800 uppercase tracking-wide">
               Step {visibleSteps.indexOf(step) + 1} of {visibleSteps.length} — {STEPS[step]}
             </p>
             <div className="mt-2 h-2 bg-gray-100 rounded-full w-52">
@@ -351,9 +359,9 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
             ← Back
           </button>
           <button onClick={next} disabled={!canNext()}
-            className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-800 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-800 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${uploading ? 'opacity-60 cursor-not-allowed' : ''}
               ${payMethod === 'gcash' ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
-            {step === 4 ? `✅ Place Order — ₱${total.toLocaleString()}` :
+            {uploading ? '⏳ Uploading proof...' : step === 4 ? `✅ Place Order — ₱${total.toLocaleString()}` :
              step === 2 && payMethod === 'gcash' ? '📱 Proceed to GCash →' :
              step === 3 ? 'Review Order →' : 'Continue →'}
           </button>

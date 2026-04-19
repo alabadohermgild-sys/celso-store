@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CONFIG, dbAddGcash, dbRead, uploadImageToImgBB } from '../../lib/config';
+import { CONFIG, dbAddGcash, dbRead, uploadToImgBB } from '../../lib/config';
 import { QtyControl, StatusBadge, EmptyState } from '../shared/UI';
 import { ArrowDownCircle, ArrowUpCircle, Upload, Send, Shield, Zap } from 'lucide-react';
 
@@ -271,24 +271,30 @@ export function GcashServices() {
   const submit = async () => {
     if (!isValid || !name || !number) return;
     setSubmitting(true);
-    // Upload proof to ImgBB first so admin can view from any device
-    let proofUrl = proofPreview;
+
+    // Upload proof image to ImgBB so admin sees it from any device
+    let proofUrl = null;
     if (proofPreview) {
-      const uploaded = await uploadImageToImgBB(proofPreview);
-      if (uploaded) proofUrl = uploaded;
+      proofUrl = await uploadToImgBB(proofPreview);
+      if (!proofUrl) proofUrl = proofPreview; // fallback to base64
     }
+
     const req = {
       id: 'GC-' + Date.now().toString().slice(-6),
       service, amount: amt, fee, youReceive, youPay,
       name, number,
-      proofPreview: proofUrl || null,
+      proofPreview: proofUrl,   // ImgBB URL or base64 or null
       status: 'pending',
       timestamp: new Date().toISOString(),
     };
+
+    // Show success immediately
     setRequests(prev => [req, ...prev]);
     setSubmitted(true);
     setSubmitting(false);
     setAmount(''); setName(''); setNumber(''); setProofPreview(null);
+
+    // Save to shared DB
     dbAddGcash(req).then(updatedReqs => {
       setRequests(updatedReqs);
     }).catch(e => console.error('GCash DB save error:', e));
@@ -414,7 +420,7 @@ export function GcashServices() {
           <button onClick={submit}
             disabled={!isValid || !name || !number || submitting}
             className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-800 py-4 rounded-xl text-base transition-all active:scale-95">
-            {submitting ? <><span className="animate-spin">⏳</span> Uploading...</> : <><Send size={18} /> Submit Request →</>}
+            {submitting ? <span>⏳ Uploading...</span> : <><Send size={18} /> Submit Request →</>}
           </button>
         </div>
 
