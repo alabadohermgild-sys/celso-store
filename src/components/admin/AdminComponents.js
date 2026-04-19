@@ -505,7 +505,10 @@ function AddProductModal({ categories, onClose, onSave }) {
 
   const save = () => {
     if (!form.name || !form.price || !form.stock) return;
-    onSave({ ...form, id: Date.now(), price: parseFloat(form.price), stock: parseInt(form.stock), unit: form.unit || 'per piece', tags: form.tags || [] });
+    const price = parseFloat(form.price);
+    const stock = parseInt(form.stock);
+    if (isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) return;
+    onSave({ ...form, id: Date.now(), price, stock, unit: form.unit || 'per piece', tags: form.tags || [] });
   };
 
   const catOptions = categories.filter(c => c.id !== 'all').map(c => c.id);
