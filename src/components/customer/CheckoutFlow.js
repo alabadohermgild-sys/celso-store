@@ -91,7 +91,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0 bg-white">
           <div>
-            <p className="text-xs text-gray-400 font-700 uppercase tracking-wide">
+            <p className="text-xs text-gray-700 font-800 uppercase tracking-wide">
               Step {visibleSteps.indexOf(step) + 1} of {visibleSteps.length} — {STEPS[step]}
             </p>
             <div className="mt-2 h-2 bg-gray-100 rounded-full w-52">
@@ -142,7 +142,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
             {step === 1 && (
               <div className="space-y-3">
                 <h3 className="text-lg font-900 text-gray-900">Select Payment Method</h3>
-                <p className="text-sm text-gray-500 font-600">GCash payments include a 2% processing fee.</p>
+                <p className="text-sm text-gray-800 font-700">GCash payments include a 2% processing fee.</p>
                 <div className="space-y-3">
                   {/* GCash always shown */}
                   <button onClick={() => setPayMethod('gcash')}
@@ -242,17 +242,17 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                   <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-900 text-2xl flex-shrink-0">G</div>
                   <div>
                     <h3 className="text-lg font-900 text-gray-900">GCash Payment</h3>
-                    <p className="text-sm text-gray-500 font-600">Send to our GCash account</p>
+                    <p className="text-sm text-gray-800 font-700">Send to our GCash account</p>
                   </div>
                 </div>
 
                 <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 font-600">Account Name</span>
+                    <span className="text-gray-800 font-700">Account Name</span>
                     <strong className="text-gray-900">{CONFIG.gcashName}</strong>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500 font-600">Mobile Number</span>
+                    <span className="text-gray-800 font-700">Mobile Number</span>
                     <div className="flex items-center gap-2">
                       <strong className="text-gray-900 font-900 text-base tracking-wide">{CONFIG.gcashNumber}</strong>
                       <button onClick={copyGcash}
@@ -262,9 +262,9 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                     </div>
                   </div>
                   <div className="border-t border-emerald-200 pt-3 space-y-1">
-                    <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">Subtotal</span><span className="font-700 text-gray-900">₱{subtotal.toLocaleString()}</span></div>
-                    {deliveryFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">Delivery</span><span className="font-700 text-gray-900">₱{deliveryFee}</span></div>}
-                    <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">GCash fee (2%)</span><span className="font-700 text-orange-600">+₱{gcashFee}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-800 font-700">Subtotal</span><span className="font-700 text-gray-900">₱{subtotal.toLocaleString()}</span></div>
+                    {deliveryFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-800 font-700">Delivery</span><span className="font-700 text-gray-900">₱{deliveryFee}</span></div>}
+                    <div className="flex justify-between text-sm"><span className="text-gray-800 font-700">GCash fee (2%)</span><span className="font-700 text-orange-600">+₱{gcashFee}</span></div>
                     <div className="flex justify-between"><span className="text-gray-700 font-800">Amount to Send</span><strong className="text-emerald-600 text-2xl font-900">₱{total.toLocaleString()}</strong></div>
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                   <label className="flex flex-col items-center gap-2 border-2 border-dashed border-gray-300 rounded-xl p-5 cursor-pointer hover:border-emerald-400 hover:bg-emerald-50 transition-all">
                     {proofPreview
                       ? <img src={proofPreview} alt="proof" className="max-h-48 rounded-lg object-contain" />
-                      : <><Upload size={28} className="text-gray-400" /><span className="text-sm text-gray-500 font-600">Tap to upload screenshot</span></>
+                      : <><Upload size={28} className="text-gray-400" /><span className="text-sm text-gray-800 font-700">Tap to upload screenshot</span></>
                     }
                     <input type="file" accept="image/*" onChange={handleProof} className="hidden" />
                   </label>
@@ -315,9 +315,9 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                   ))}
                 </div>
                 <div className="space-y-2 px-1">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">Subtotal</span><span className="font-700 text-gray-900">₱{subtotal.toLocaleString()}</span></div>
-                  {deliveryFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">Delivery ({zone?.label})</span><span className="font-700 text-gray-900">₱{deliveryFee}</span></div>}
-                  {gcashFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-500 font-600">GCash fee (2%)</span><span className="font-700 text-orange-600">+₱{gcashFee}</span></div>}
+                  <div className="flex justify-between text-sm"><span className="text-gray-800 font-700">Subtotal</span><span className="font-700 text-gray-900">₱{subtotal.toLocaleString()}</span></div>
+                  {deliveryFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-800 font-700">Delivery ({zone?.label})</span><span className="font-700 text-gray-900">₱{deliveryFee}</span></div>}
+                  {gcashFee > 0 && <div className="flex justify-between text-sm"><span className="text-gray-800 font-700">GCash fee (2%)</span><span className="font-700 text-orange-600">+₱{gcashFee}</span></div>}
                   <div className="flex justify-between font-900 text-base border-t border-gray-200 pt-2">
                     <span className="text-gray-900">Total</span>
                     <span className="text-green-600 text-xl">₱{total.toLocaleString()}</span>
@@ -333,7 +333,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
                     info.address && ['Address', info.address],
                   ].filter(Boolean).map(([k, v]) => (
                     <div key={k} className="flex justify-between">
-                      <span className="text-gray-500 font-600">{k}</span>
+                      <span className="text-gray-800 font-700">{k}</span>
                       <span className="font-700 text-gray-900 text-right max-w-xs text-xs">{v}</span>
                     </div>
                   ))}

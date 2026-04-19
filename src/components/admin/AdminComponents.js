@@ -128,6 +128,7 @@ export function AdminPanel({ onLogout }) {
 
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [showManageCategories, setShowManageCategories] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
   const [viewReceipt, setViewReceipt] = useState(null); // image url to view
   const [viewOrderReceipt, setViewOrderReceipt] = useState(null); // order with proof
@@ -287,8 +288,8 @@ export function AdminPanel({ onLogout }) {
                           🖼️ View GCash Receipt
                         </button>
                       )}
-                      {order.payMethod === 'gcash' && !order.proofPreview && (
-                        <p className="text-xs text-amber-700 font-700 bg-amber-50 px-2 py-1 rounded-lg">⚠️ No receipt uploaded yet</p>
+                      {order.payMethod === 'gcash' && (
+                        <p className="text-xs text-blue-700 font-700 bg-blue-50 px-2 py-1 rounded-lg">📱 GCash payment - ref: {order.gcashRef || 'pending'}</p>
                       )}
 
                       <div className="flex flex-wrap gap-1 py-1">
@@ -451,6 +452,14 @@ export function AdminPanel({ onLogout }) {
         <AddCategoryModal
           onClose={() => setShowAddCategory(false)}
           onSave={(c) => { saveCategories([...categories, c]); setShowAddCategory(false); }}
+        />
+      )}
+
+      {showManageCategories && (
+        <ManageCategoriesModal
+          categories={categories}
+          onClose={() => setShowManageCategories(false)}
+          onSave={(updated) => { saveCategories(updated); setShowManageCategories(false); }}
         />
       )}
 
@@ -642,6 +651,57 @@ function AddCategoryModal({ onClose, onSave }) {
               Add Category
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ManageCategoriesModal({ categories, onClose, onSave }) {
+  const [cats, setCats] = React.useState(categories.filter(c => c.id !== 'all'));
+  const [editing, setEditing] = React.useState(null);
+  const [editName, setEditName] = React.useState('');
+  const [editEmoji, setEditEmoji] = React.useState('');
+
+  const startEdit = (cat) => { setEditing(cat.id); setEditName(cat.name); setEditEmoji(cat.emoji); };
+  const saveEdit = () => {
+    setCats(prev => prev.map(c => c.id === editing ? { ...c, name: editName, emoji: editEmoji } : c));
+    setEditing(null);
+  };
+  const deletecat = (id) => { if (window.confirm('Delete this category?')) setCats(prev => prev.filter(c => c.id !== id)); };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-lg font-900 text-gray-900">Manage Categories</h3>
+          <button onClick={onClose} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-700 text-lg hover:bg-gray-200">x</button>
+        </div>
+        <div className="space-y-2">
+          {cats.map(cat => (
+            <div key={cat.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+              {editing === cat.id ? (
+                <>
+                  <input value={editEmoji} onChange={e => setEditEmoji(e.target.value)} className="w-12 border border-gray-200 rounded-lg px-2 py-1.5 text-xl text-center outline-none focus:border-green-500" />
+                  <input value={editName} onChange={e => setEditName(e.target.value)} className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-green-500 text-gray-900" />
+                  <button onClick={saveEdit} className="px-3 py-1.5 bg-green-600 text-white text-xs font-800 rounded-lg hover:bg-green-700">Save</button>
+                  <button onClick={() => setEditing(null)} className="px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-800 rounded-lg hover:bg-gray-300">Cancel</button>
+                </>
+              ) : (
+                <>
+                  <span className="text-xl">{cat.emoji}</span>
+                  <span className="flex-1 text-sm font-700 text-gray-900">{cat.name}</span>
+                  <button onClick={() => startEdit(cat)} className="px-2.5 py-1.5 bg-blue-50 text-blue-700 text-xs font-800 rounded-lg hover:bg-blue-100 border border-blue-200">Edit</button>
+                  <button onClick={() => deletecat(cat.id)} className="px-2.5 py-1.5 bg-red-50 text-red-600 text-xs font-800 rounded-lg hover:bg-red-100 border border-red-200">Delete</button>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-3 mt-5">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-sm font-800 text-gray-700 hover:bg-gray-50">Cancel</button>
+          <button onClick={() => onSave([{ id: 'all', name: 'All', emoji: '🛒' }, ...cats])} className="flex-1 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-800 active:scale-95">Save Changes</button>
         </div>
       </div>
     </div>

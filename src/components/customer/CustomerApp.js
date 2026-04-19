@@ -33,7 +33,7 @@ function PageFooter() {
     <>
       <footer className="border-t border-gray-200 mt-8 pt-8 pb-6 px-6 text-center">
         <p className="text-base font-900 text-gray-800">🏪 Celso Store</p>
-        <p className="text-sm text-gray-500 font-700 mt-0.5">Proudly Serving You!</p>
+        <p className="text-sm text-gray-600 font-700 mt-0.5">Happy to serve you. ☺️</p>
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-500 font-700 flex-wrap">
           <button onClick={() => setShowTerms(true)} className="hover:text-green-600 transition-colors underline underline-offset-2">Terms of Service</button>
           <span className="text-gray-300">·</span>

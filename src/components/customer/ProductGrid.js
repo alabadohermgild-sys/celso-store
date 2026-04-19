@@ -49,10 +49,10 @@ function ProductCard({ product, cartQty, onView, onAdd, onInc, onDec }) {
       {/* Image area */}
       <div className="relative bg-green-50 flex items-center justify-center overflow-hidden" style={{ paddingBottom: '70%', height: 0, position: 'relative' }}>
         <div className="absolute inset-0 flex items-center justify-center">
-          {product.image
-            ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-            : <span className="text-5xl lg:text-6xl">{product.emoji}</span>
-          }
+          {product.image && product.image.startsWith('data:')
+            ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+            : null}
+          <span className="text-5xl lg:text-6xl" style={{ display: product.image && product.image.startsWith('data:') ? 'none' : 'flex' }}>{product.emoji}</span>
         </div>
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
