@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CONFIG, ls } from '../../lib/config';
+import { CONFIG, ls, uploadImageToImgBB } from '../../lib/config';
 import { Upload } from 'lucide-react';
 
 const STEPS = ['Order Type', 'Payment', 'Your Info', 'GCash Payment', 'Confirm'];
@@ -25,6 +25,7 @@ export default function CheckoutFlow({ cart, subtotal, onClose, onPlace }) {
   const [gcashRef, setGcashRef] = useState('');
   const [proofPreview, setProofPreview] = useState(null);
   const [errors] = useState({});
+  const [uploading, setUploading] = useState(false);
   const [nameSaved, setNameSaved] = useState(() => !!ls.get('celso_customer', {}).name);
   const [copied, setCopied] = useState(false);
 

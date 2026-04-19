@@ -132,3 +132,28 @@ export async function dbUpdateGcashStatus(id, status) {
     return updated.gcashRequests;
   } finally { _busy = false; }
 }
+
+// ── ImgBB Image Upload ────────────────────────────────────────────────────────
+const IMGBB_API_KEY = '54446f7ac76c1f77a942537140abe21es';
+
+export async function uploadImageToImgBB(base64String) {
+  try {
+    // Remove data:image/...;base64, prefix
+    const base64Data = base64String.includes(',') ? base64String.split(',')[1] : base64String;
+    const formData = new FormData();
+    formData.append('key', IMGBB_API_KEY);
+    formData.append('image', base64Data);
+    const res = await fetch('https://api.imgbb.com/1/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    const json = await res.json();
+    if (json.success) {
+      return json.data.url; // returns a permanent URL
+    }
+    throw new Error('ImgBB upload failed: ' + json.error?.message);
+  } catch(e) {
+    console.error('ImgBB upload error:', e);
+    return null;
+  }
+}

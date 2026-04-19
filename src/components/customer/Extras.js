@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CONFIG, dbAddGcash, dbRead } from '../../lib/config';
+import { CONFIG, dbAddGcash, dbRead, uploadImageToImgBB } from '../../lib/config';
 import { QtyControl, StatusBadge, EmptyState } from '../shared/UI';
 import { ArrowDownCircle, ArrowUpCircle, Upload, Send, Shield, Zap } from 'lucide-react';
 
@@ -266,44 +266,31 @@ export function GcashServices() {
     });
   };
 
+  const [submitting, setSubmitting] = useState(false);
+
   const submit = async () => {
     if (!isValid || !name || !number) return;
+    setSubmitting(true);
+    // Upload proof to ImgBB first so admin can view from any device
+    let proofUrl = proofPreview;
+    if (proofPreview) {
+      const uploaded = await uploadImageToImgBB(proofPreview);
+      if (uploaded) proofUrl = uploaded;
+    }
     const req = {
       id: 'GC-' + Date.now().toString().slice(-6),
-      service,
-      amount: amt,
-      fee,
-      youReceive,
-      youPay,
-      name,
-      number,
-      proofPreview: proofPreview || null,
+      service, amount: amt, fee, youReceive, youPay,
+      name, number,
+      proofPreview: proofUrl || null,
       status: 'pending',
       timestamp: new Date().toISOString(),
     };
-    // Show success immediately
     setRequests(prev => [req, ...prev]);
     setSubmitted(true);
+    setSubmitting(false);
     setAmount(''); setName(''); setNumber(''); setProofPreview(null);
-    // Save proof image locally keyed by request ID (too large for DB)
-    if (req.proofPreview) {
-      try {
-        const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
-        localProofs[req.id] = req.proofPreview;
-        localStorage.setItem('celso_gcash_proofs', JSON.stringify(localProofs));
-      } catch(e) { console.error('Proof save error:', e); }
-    }
-    // Save to DB - stripBase64 auto-marks proof as [img] in DB
     dbAddGcash(req).then(updatedReqs => {
-      // Re-merge local proofs after DB update
-      try {
-        const localProofs = JSON.parse(localStorage.getItem('celso_gcash_proofs') || '{}');
-        const merged = updatedReqs.map(r => ({
-          ...r,
-          proofPreview: localProofs[r.id] || r.proofPreview || null,
-        }));
-        setRequests(merged);
-      } catch { setRequests(updatedReqs); }
+      setRequests(updatedReqs);
     }).catch(e => console.error('GCash DB save error:', e));
   };
 
@@ -425,9 +412,9 @@ export function GcashServices() {
           )}
 
           <button onClick={submit}
-            disabled={!isValid || !name || !number}
+            disabled={!isValid || !name || !number || submitting}
             className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-800 py-4 rounded-xl text-base transition-all active:scale-95">
-            <Send size={18} /> Submit Request →
+            {submitting ? <><span className="animate-spin">⏳</span> Uploading...</> : <><Send size={18} /> Submit Request →</>}
           </button>
         </div>
 
